@@ -2,7 +2,9 @@
 
 Fast, offline conversion of Markdown files to PDF, Word, and Excel on Windows.
 
-![Markdown Converter Pro Logo](img/md_converter.png)
+<p align="center">
+  <img src="img/md_converter.png" alt="Markdown Converter Pro Logo" width="200">
+</p>
 
 ## Table of contents
 
