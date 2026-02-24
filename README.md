@@ -1,6 +1,6 @@
 # Markdown Converter Pro
 
-Fast, offline conversion of Markdown files to PDF, Word, and Excel on Windows.
+Fast, offline conversion of Markdown files to PDF, Word, and Excel on Windows, Linux, and macOS.
 
 <p align="center">
   <img src="img/md_converter.png" alt="Markdown Converter Pro Logo" width="200">
@@ -25,7 +25,7 @@ Fast, offline conversion of Markdown files to PDF, Word, and Excel on Windows.
 
 ## Overview
 
-Markdown Converter Pro is a Windows desktop app that turns `.md` and `.markdown` files into polished PDF, DOCX, and XLSX outputs with a clean, drag-and-drop UI.
+Markdown Converter Pro is now split into a cross-platform conversion core and an Avalonia desktop app that turns `.md` and `.markdown` files into PDF, DOCX, and XLSX outputs with a drag-and-drop workflow.
 
 ## Features
 
@@ -51,20 +51,23 @@ Markdown Converter Pro is a Windows desktop app that turns `.md` and `.markdown`
 
 Requirements:
 
-- Windows 10/11
-- .NET SDK that supports `net10.0-windows` (for example, the .NET 10 SDK)
-- Visual Studio 2022+ with the .NET Desktop Development workload (optional but recommended)
+- Windows / Linux / macOS (x64)
+- .NET 10 SDK
+- wkhtmltopdf native runtime (`libwkhtmltox`) for PDF export:
+  - `src/MarkdownConverter.Desktop/runtimes/win-x64/native/libwkhtmltox.dll`
+  - `src/MarkdownConverter.Desktop/runtimes/linux-x64/native/libwkhtmltox.so`
+  - `src/MarkdownConverter.Desktop/runtimes/osx-x64/native/libwkhtmltox.dylib`
 
 Build and run:
 
-```powershell
+```bash
 # from the repo root
 
-dotnet restore
+dotnet restore --ignore-failed-sources
 
-dotnet build
+dotnet build MarkdownConverter.sln --ignore-failed-sources -m:1
 
-dotnet run --project MarkdownConverter.csproj
+dotnet run --project src/MarkdownConverter.Desktop/MarkdownConverter.Desktop.csproj --ignore-failed-sources
 ```
 
 ## Usage
@@ -95,24 +98,21 @@ The renderer enables advanced Markdown features, including:
 
 ## Customize styling
 
-- PDF and Word styles live in `Converters/MarkdownToHtmlRenderer.cs` (embedded CSS).
-- Excel table styling is configured in `Converters/XlsxExporter.cs`.
+- PDF and Word styles live in `src/MarkdownConverter.Core/Converters/MarkdownToHtmlRenderer.cs` (embedded CSS).
+- Excel table styling is configured in `src/MarkdownConverter.Core/Converters/XlsxExporter.cs`.
 
 ## Project structure
 
 ```
 .
-?? Converters/           # PDF, Word, Excel exporters + HTML renderer
-?? Controls/             # Custom WPF controls
-?? Models/               # Data models (formats, options)
-?? Samples/              # Markdown samples to validate rendering
-?? Themes/               # App theme and resources
-?? UI/                   # Dialogs and WPF converters
-?? ViewModels/           # MVVM logic
-?? img/                  # Icons and images
-?? MainWindow.xaml       # Main UI layout
-?? App.xaml              # App resources
-?? MarkdownConverter.csproj
+?? src/MarkdownConverter.Core/      # Cross-platform conversion core + MVVM
+?? src/MarkdownConverter.Desktop/   # Avalonia desktop app (Win/Linux/macOS)
+?? tests/MarkdownConverter.Tests/   # Offline-friendly test harness
+?? tests/Fixtures/                  # Markdown fixtures for parity checks
+?? tests/Baselines/                 # Baseline output scaffold + metadata template
+?? Samples/                         # Sample markdown used for manual validation
+?? Converters/, ViewModels/, UI/    # Legacy WPF source tree retained for reference/migration
+?? MarkdownConverter.csproj         # Legacy Windows-only project (not in solution)
 ```
 
 ## Samples
@@ -124,7 +124,8 @@ Use the sample Markdown snippets in `Samples/ConversionSamples.md` to validate f
 Key packages used in this project:
 
 - Markdig (Markdown parsing)
-- DinkToPdf / DinkToPdfAll (PDF export)
+- DinkToPdf (PDF export API wrapper)
+- Native wkhtmltopdf runtime files (`libwkhtmltox`) per target platform
 - DocumentFormat.OpenXml + HtmlToOpenXml (Word export)
 - ClosedXML (Excel export)
 

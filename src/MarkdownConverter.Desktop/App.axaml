@@ -1,0 +1,20 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MarkdownConverter.Desktop.App">
+  <Application.Styles>
+    <FluentTheme />
+  </Application.Styles>
+  <Application.Resources>
+    <SolidColorBrush x:Key="AppBgBrush">#1F252F</SolidColorBrush>
+    <SolidColorBrush x:Key="PanelBrush">#242B36</SolidColorBrush>
+    <SolidColorBrush x:Key="PanelAltBrush">#303845</SolidColorBrush>
+    <SolidColorBrush x:Key="PanelInsetBrush">#3F4654</SolidColorBrush>
+    <SolidColorBrush x:Key="StrokeBrush">#4B5565</SolidColorBrush>
+    <SolidColorBrush x:Key="AccentBrush">#18AEB6</SolidColorBrush>
+    <SolidColorBrush x:Key="AccentStrongBrush">#22C6CE</SolidColorBrush>
+    <SolidColorBrush x:Key="TextPrimaryBrush">#E7EDF4</SolidColorBrush>
+    <SolidColorBrush x:Key="TextSecondaryBrush">#B7C1CF</SolidColorBrush>
+    <SolidColorBrush x:Key="TextMutedBrush">#93A0B0</SolidColorBrush>
+    <SolidColorBrush x:Key="SoftLightBrush">#D6DADF</SolidColorBrush>
+  </Application.Resources>
+</Application>
