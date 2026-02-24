@@ -78,6 +78,43 @@ dotnet run --project src/MarkdownConverter.Desktop/MarkdownConverter.Desktop.csp
 4. Pick the output folder.
 5. Click Convert.
 
+## Ubuntu Dock icon (launcher setup)
+
+The app window icon is loaded from `src/MarkdownConverter.Desktop/Assets/md_converter.ico`, but Ubuntu/GNOME Dock icon grouping also depends on Linux launcher metadata and window identity (`WM_CLASS` on X11).
+
+This repo includes a desktop entry template at `packaging/linux/markdown-converter-pro.desktop` and uses the canonical Linux app id `markdown-converter-pro`.
+
+Local user install (Ubuntu/GNOME):
+
+```bash
+mkdir -p ~/.local/share/icons/hicolor/256x256/apps
+mkdir -p ~/.local/share/applications
+
+cp src/MarkdownConverter.Desktop/Assets/md_converter.png \
+  ~/.local/share/icons/hicolor/256x256/apps/markdown-converter-pro.png
+
+cp packaging/linux/markdown-converter-pro.desktop \
+  ~/.local/share/applications/markdown-converter-pro.desktop
+
+chmod +x ~/.local/share/applications/markdown-converter-pro.desktop
+```
+
+Then edit `~/.local/share/applications/markdown-converter-pro.desktop` and replace the `Exec=` line with the actual command/path you use to launch the app.
+
+Optional refresh commands (distribution-dependent):
+
+```bash
+update-desktop-database ~/.local/share/applications || true
+gtk-update-icon-cache ~/.local/share/icons/hicolor || true
+```
+
+### Troubleshooting (Ubuntu/GNOME)
+
+- GNOME Shell may cache launcher icons. Unpin/re-pin the app and relaunch after changing the desktop file or icon.
+- `dotnet run` grouping on X11 depends on `WM_CLASS`; this app now sets `WM_CLASS=markdown-converter-pro` at runtime on X11 sessions.
+- Verify the runtime class on X11 with `xprop WM_CLASS` and click the app window.
+- Wayland behavior can differ by shell/session because `WM_CLASS` is an X11 concept.
+
 ## Conversion pipeline
 
 - Markdown is parsed with Markdig and rendered to HTML.

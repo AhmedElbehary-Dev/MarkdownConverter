@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Markdown Converter Pro
+Comment=Convert Markdown files to PDF, Word, and Excel
+# Replace Exec with your installed app command or absolute path.
+Exec=dotnet /ABSOLUTE/PATH/TO/src/MarkdownConverter.Desktop/bin/Release/net10.0/MarkdownConverter.Desktop.dll
+Icon=markdown-converter-pro
+Terminal=false
+Categories=Office;Utility;
+StartupWMClass=markdown-converter-pro

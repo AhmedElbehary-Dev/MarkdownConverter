@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using MarkdownConverter.Converters;
 using MarkdownConverter.Desktop.Services;
+using MarkdownConverter.Desktop.Platform;
 using MarkdownConverter.ViewModels;
 using System;
 using System.Linq;
@@ -17,6 +18,7 @@ public partial class MainWindow : Window
     private static readonly IBrush DropZoneIdleBorder = Brush.Parse("#4B5565");
     private static readonly IBrush DropZoneActiveBorder = Brush.Parse("#18AEB6");
     private readonly Func<Func<Window?>, MainViewModel> _viewModelFactory;
+    private bool _linuxDesktopIdentityApplied;
 
     public MainWindow()
         : this(static getOwner => new MainViewModel(new ConversionService(), new AvaloniaUiPlatformServices(getOwner)))
@@ -30,6 +32,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = _viewModelFactory(() => this);
         ApplyDropZoneVisualState(isActive: false);
+        Opened += MainWindow_Opened;
     }
 
     private MainViewModel? ViewModel => DataContext as MainViewModel;
@@ -143,5 +146,16 @@ public partial class MainWindow : Window
         return item.Path.IsFile
             ? item.Path.LocalPath
             : item.Path.LocalPath;
+    }
+
+    private void MainWindow_Opened(object? sender, EventArgs e)
+    {
+        if (_linuxDesktopIdentityApplied)
+        {
+            return;
+        }
+
+        _linuxDesktopIdentityApplied = true;
+        LinuxDesktopIntegration.TryApplyRuntimeIdentity(this);
     }
 }
