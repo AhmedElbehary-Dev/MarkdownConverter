@@ -11,6 +11,7 @@
         MinWidth="840"
         MinHeight="620"
         Title="Markdown Converter Pro"
+        Icon="avares://MarkdownConverter.Desktop/Assets/md_converter.ico"
         Background="{DynamicResource AppBgBrush}">
   <Window.Resources>
     <conv:BooleanNegationConverter x:Key="BoolNot" />

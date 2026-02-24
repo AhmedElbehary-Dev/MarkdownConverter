@@ -74,13 +74,19 @@ pre {
     border-radius: 10px;
     border: 1px solid #111827;
     line-height: 1.4;
-    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    overflow: visible;
     margin: 1rem 0;
 }
 pre code {
     background: none;
     color: inherit;
     padding: 0;
+    white-space: inherit;
+    overflow-wrap: inherit;
+    word-break: inherit;
 }
 blockquote {
     border-left: 4px solid #cbd5f5;
