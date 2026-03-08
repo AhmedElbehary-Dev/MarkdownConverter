@@ -17,6 +17,7 @@ public sealed class PdfExporter
     private static readonly IConverter Converter = new SynchronizedConverter(new PdfTools());
     private static readonly string[] ChromiumCommandCandidates =
     {
+        "chrome",
         "google-chrome",
         "google-chrome-stable",
         "chromium-browser",
