@@ -1,190 +1,76 @@
 # Markdown Converter Pro
 
-Fast, offline conversion of Markdown files to PDF, Word, and Excel on Windows, Linux, and macOS.
-
 <p align="center">
-  <img src="img/md_converter.png" alt="Markdown Converter Pro Logo" width="200">
+  <img src="img/md_converter.png" alt="Markdown Converter Pro" width="180">
 </p>
 
-## Table of contents
+<p align="center">
+  <b>Convert Markdown to PDF, Word, and Excel — fast, offline, cross-platform.</b>
+</p>
 
-- Overview
-- Features
-- Screenshot
-- Formats
-- Quick start
-- Usage
-- Conversion pipeline
-- Markdown support
-- Customize styling
-- Project structure
-- Samples
-- Dependencies
-- License
-- Contributing
-
-## Overview
-
-Markdown Converter Pro is now split into a cross-platform conversion core and an Avalonia desktop app that turns `.md` and `.markdown` files into PDF, DOCX, and XLSX outputs with a drag-and-drop workflow.
+---
 
 ## Features
 
-- Drag and drop Markdown files anywhere in the window
-- Output formats: PDF (A4), Word (DOCX), Excel (XLSX)
-- Table-aware Excel export with one worksheet per table
-- Notes sheet in Excel for non-table content
-- Consistent styling for PDF and Word via embedded HTML/CSS
-- Output controls: choose folder, copy output path, open after convert, overwrite toggle
-- Progress indicator and toast notifications
+- **Drag & Drop** — drop `.md` files anywhere in the window to convert
+- **Quick Paste** — paste markdown directly without creating files, with auto-detected titles and a history library
+- **PDF** — print-ready A4 layout via HTML-to-PDF rendering
+- **Word (DOCX)** — editable documents from HTML-to-DOCX conversion
+- **Excel (XLSX)** — tables extracted into worksheets, non-table content collected in a Notes sheet
+- **Output controls** — choose folder, copy path, open after convert, overwrite toggle
+- **Progress & notifications** — inline progress indicator and toast alerts
 
-## Screenshot
+## Screenshots
 
-![App Screenshot](img/main_screenshot.png)
+| Main Window | Quick Paste |
+|:-----------:|:-----------:|
+| ![Main Window](img/main_screenshot.png) | ![Quick Paste](img/screen-2.png) |
 
-## Quick Paste
+## Quick Start
 
-The new **Quick Paste Module** allows you to convert markdown without creating intermediate files. Accessible via the **Quick Paste** button in the main window, this feature includes:
+**Requirements:** .NET 10 SDK · Windows / Linux / macOS (x64)
 
-- **Direct Markdown Pasting**: Paste your text directly into the application.
-- **Auto-detected Titles**: Automatically extracts the document title from your markdown headings.
-- **History Library**: Easily search, load, or delete your previously pasted notes.
-- **Flexible Export**: Choose your export format (PDF, DOCX, XLSX) and instantly "Save & Export" or simply "Save Only".
-
-### Quick Paste Interface
-
-![Quick Paste Button](img/screen_1.png)
-
-![Quick Paste Module](img/screen-2.png)
-
-## Formats
-
-- PDF: HTML-to-PDF rendering with a print-ready A4 layout
-- Word: HTML-to-DOCX conversion for editable documents
-- Excel: Tables extracted into worksheets, with notes collected separately
-
-## Quick start
-
-Requirements:
-
-- Windows / Linux / macOS (x64)
-- .NET 10 SDK
-- wkhtmltopdf native runtime (`libwkhtmltox`) for PDF export:
-  - `src/MarkdownConverter.Desktop/runtimes/win-x64/native/libwkhtmltox.dll`
-  - `src/MarkdownConverter.Desktop/runtimes/linux-x64/native/libwkhtmltox.so`
-  - `src/MarkdownConverter.Desktop/runtimes/osx-x64/native/libwkhtmltox.dylib`
-
-Build and run:
+PDF export needs the native `libwkhtmltox` runtime placed under `src/MarkdownConverter.Desktop/runtimes/{rid}/native/`.
 
 ```bash
-# from the repo root
-
-dotnet restore --ignore-failed-sources
-
-dotnet build MarkdownConverter.sln --ignore-failed-sources -m:1
-
-dotnet run --project src/MarkdownConverter.Desktop/MarkdownConverter.Desktop.csproj --ignore-failed-sources
+dotnet restore
+dotnet build MarkdownConverter.sln
+dotnet run --project src/MarkdownConverter.Desktop/MarkdownConverter.Desktop.csproj
 ```
 
 ## Usage
 
 1. Launch the app.
-2. Drag a `.md` or `.markdown` file into the window (or click Browse).
-3. Choose the output format (PDF, Word, or Excel).
-4. Pick the output folder.
-5. Click Convert.
+2. Drop a `.md` file into the window (or click **Browse**).
+3. Pick the output format and folder.
+4. Click **Convert**.
 
-## Ubuntu Dock icon (launcher setup)
-
-The app window icon is loaded from `src/MarkdownConverter.Desktop/Assets/md_converter.ico`, but Ubuntu/GNOME Dock icon grouping also depends on Linux launcher metadata and window identity (`WM_CLASS` on X11).
-
-This repo includes a desktop entry template at `packaging/linux/markdown-converter-pro.desktop` and uses the canonical Linux app id `markdown-converter-pro`.
-
-Local user install (Ubuntu/GNOME):
-
-```bash
-mkdir -p ~/.local/share/icons/hicolor/256x256/apps
-mkdir -p ~/.local/share/applications
-
-cp src/MarkdownConverter.Desktop/Assets/md_converter.png \
-  ~/.local/share/icons/hicolor/256x256/apps/markdown-converter-pro.png
-
-cp packaging/linux/markdown-converter-pro.desktop \
-  ~/.local/share/applications/markdown-converter-pro.desktop
-
-chmod +x ~/.local/share/applications/markdown-converter-pro.desktop
-```
-
-Then edit `~/.local/share/applications/markdown-converter-pro.desktop` and replace the `Exec=` line with the actual command/path you use to launch the app.
-
-Optional refresh commands (distribution-dependent):
-
-```bash
-update-desktop-database ~/.local/share/applications || true
-gtk-update-icon-cache ~/.local/share/icons/hicolor || true
-```
-
-### Troubleshooting (Ubuntu/GNOME)
-
-- GNOME Shell may cache launcher icons. Unpin/re-pin the app and relaunch after changing the desktop file or icon.
-- `dotnet run` grouping on X11 depends on `WM_CLASS`; this app now sets `WM_CLASS=markdown-converter-pro` at runtime on X11 sessions.
-- Verify the runtime class on X11 with `xprop WM_CLASS` and click the app window.
-- Wayland behavior can differ by shell/session because `WM_CLASS` is an X11 concept.
-
-## Conversion pipeline
-
-- Markdown is parsed with Markdig and rendered to HTML.
-- PDF export uses DinkToPdf (HTML-to-PDF, A4, 300 DPI, no JS).
-- Word export uses OpenXML + HtmlToOpenXml to transform HTML into DOCX.
-- Excel export parses Markdown tables and builds worksheets via ClosedXML.
-
-## Markdown support
-
-The renderer enables advanced Markdown features, including:
-
-- GitHub-style auto identifiers for headings
-- Pipe tables and grid tables
-- Task lists
-- Auto links
-- Emoji and smiley shortcuts
-- Soft line breaks treated as hard line breaks
-
-## Customize styling
-
-- PDF and Word styles live in `src/MarkdownConverter.Core/Converters/MarkdownToHtmlRenderer.cs` (embedded CSS).
-- Excel table styling is configured in `src/MarkdownConverter.Core/Converters/XlsxExporter.cs`.
-
-## Project structure
+## Project Structure
 
 ```
-.
-?? src/MarkdownConverter.Core/      # Cross-platform conversion core + MVVM
-?? src/MarkdownConverter.Desktop/   # Avalonia desktop app (Win/Linux/macOS)
-?? tests/MarkdownConverter.Tests/   # Offline-friendly test harness
-?? tests/Fixtures/                  # Markdown fixtures for parity checks
-?? tests/Baselines/                 # Baseline output scaffold + metadata template
-?? Samples/                         # Sample markdown used for manual validation
-?? Converters/, ViewModels/, UI/    # Legacy WPF source tree retained for reference/migration
-?? MarkdownConverter.csproj         # Legacy Windows-only project (not in solution)
+src/
+  MarkdownConverter.Core/       # Cross-platform conversion core & MVVM
+  MarkdownConverter.Desktop/    # Avalonia desktop app (Win / Linux / macOS)
+tests/
+  MarkdownConverter.Tests/      # Test harness
+  Fixtures/                     # Markdown fixtures
+  Baselines/                    # Baseline output scaffolds
+Samples/                        # Sample markdown for manual validation
 ```
-
-## Samples
-
-Use the sample Markdown snippets in `Samples/ConversionSamples.md` to validate formatting across exports.
 
 ## Dependencies
 
-Key packages used in this project:
-
-- Markdig (Markdown parsing)
-- DinkToPdf (PDF export API wrapper)
-- Native wkhtmltopdf runtime files (`libwkhtmltox`) per target platform
-- DocumentFormat.OpenXml + HtmlToOpenXml (Word export)
-- ClosedXML (Excel export)
+| Package | Purpose |
+|---------|---------|
+| Markdig | Markdown parsing |
+| DinkToPdf | PDF export (wkhtmltopdf wrapper) |
+| OpenXml + HtmlToOpenXml | Word export |
+| ClosedXML | Excel export |
 
 ## License
 
-See `LICENSE.txt`.
+See [`LICENSE.txt`](LICENSE.txt).
 
 ## Contributing
 
-Issues and pull requests are welcome. Please include a clear description of the change and the expected behavior.
+Issues and pull requests are welcome.
