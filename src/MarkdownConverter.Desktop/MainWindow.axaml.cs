@@ -158,4 +158,14 @@ public partial class MainWindow : Window
         _linuxDesktopIdentityApplied = true;
         LinuxDesktopIntegration.TryApplyRuntimeIdentity(this);
     }
+
+    private void QuickPaste_Click(object? sender, RoutedEventArgs e)
+    {
+        var services = new AvaloniaUiPlatformServices(() => MarkdownConverter.Desktop.App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop ? desktop.MainWindow : this);
+        var storage = new MarkdownConverter.Services.QuickPasteStorageService();
+        var vm = new QuickPasteViewModel(new ConversionService(), services, storage);
+        
+        var window = new MarkdownConverter.Desktop.UI.QuickPasteWindow(vm);
+        window.Show(this);
+    }
 }

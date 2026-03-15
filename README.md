@@ -41,6 +41,21 @@ Markdown Converter Pro is now split into a cross-platform conversion core and an
 
 ![App Screenshot](img/main_screenshot.png)
 
+## Quick Paste
+
+The new **Quick Paste Module** allows you to convert markdown without creating intermediate files. Accessible via the **Quick Paste** button in the main window, this feature includes:
+
+- **Direct Markdown Pasting**: Paste your text directly into the application.
+- **Auto-detected Titles**: Automatically extracts the document title from your markdown headings.
+- **History Library**: Easily search, load, or delete your previously pasted notes.
+- **Flexible Export**: Choose your export format (PDF, DOCX, XLSX) and instantly "Save & Export" or simply "Save Only".
+
+### Quick Paste Interface
+
+![Quick Paste Button](img/screen_1.png)
+
+![Quick Paste Module](img/screen-2.png)
+
 ## Formats
 
 - PDF: HTML-to-PDF rendering with a print-ready A4 layout

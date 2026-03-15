@@ -116,7 +116,7 @@
             CornerRadius="240" />
 
     <Border Grid.Row="0" Classes="card" Padding="16">
-      <Grid ColumnDefinitions="Auto,*,Auto">
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto">
         <Border Width="72"
                 Height="72"
                 CornerRadius="16"
@@ -131,11 +131,17 @@
           <TextBlock Text="{Binding AppVersion}" Foreground="{DynamicResource TextMutedBrush}" FontSize="12" />
         </StackPanel>
 
-        <Border Grid.Column="2" Classes="subtle" VerticalAlignment="Center" Padding="12,6">
+        <Border Grid.Column="2" Classes="subtle" VerticalAlignment="Center" Padding="12,6" Margin="0,0,16,0">
           <TextBlock Text="{Binding StatusText}"
                      Foreground="{Binding StatusKind, Converter={StaticResource StatusBrush}}"
                      FontWeight="SemiBold" />
         </Border>
+        
+        <Button Grid.Column="3" 
+                Content="Quick Paste" 
+                Classes="primary" 
+                VerticalAlignment="Center" 
+                Click="QuickPaste_Click" />
       </Grid>
     </Border>
 

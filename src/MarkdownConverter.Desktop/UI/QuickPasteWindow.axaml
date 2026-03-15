@@ -1,0 +1,206 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:conv="using:MarkdownConverter.Desktop.Converters"
+        xmlns:vm="clr-namespace:MarkdownConverter.ViewModels;assembly=MarkdownConverter.Core"
+        x:Class="MarkdownConverter.Desktop.UI.QuickPasteWindow"
+        mc:Ignorable="d"
+        Width="1040"
+        Height="720"
+        MinWidth="900"
+        MinHeight="600"
+        Title="Quick Paste - Markdown Converter Pro"
+        Icon="avares://MarkdownConverter.Desktop/Assets/md_converter.ico"
+        Background="{DynamicResource AppBgBrush}">
+  <Window.Resources>
+    <conv:BooleanNegationConverter x:Key="BoolNot" />
+    <conv:StatusKindToBrushConverter x:Key="StatusBrush" />
+    <conv:ToastKindToBrushConverter x:Key="ToastBrush" />
+  </Window.Resources>
+
+  <Window.Styles>
+    <Style Selector="TextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource StrokeBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="14" />
+    </Style>
+
+    <Style Selector="Border.subtle">
+      <Setter Property="Background" Value="{DynamicResource PanelAltBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource StrokeBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+    </Style>
+
+    <Style Selector="Button">
+      <Setter Property="Background" Value="{DynamicResource PanelInsetBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource StrokeBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="12,8" />
+    </Style>
+
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+      <Setter Property="Foreground" Value="#091318" />
+      <Setter Property="BorderBrush" Value="#34D2D9" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.flat">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="{DynamicResource StrokeBrush}" />
+    </Style>
+
+    <Style Selector="TextBox">
+      <Setter Property="Background" Value="#202733" />
+      <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource StrokeBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="10,8" />
+    </Style>
+
+    <Style Selector="ComboBox">
+      <Setter Property="Background" Value="#202733" />
+      <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource StrokeBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    
+    <Style Selector="ListBox">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="ListBoxItem">
+      <Setter Property="Padding" Value="12,8" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Margin" Value="0,0,0,4" />
+    </Style>
+    <Style Selector="ListBoxItem:selected">
+      <Setter Property="Background" Value="{DynamicResource PanelInsetBrush}" />
+    </Style>
+  </Window.Styles>
+
+  <Grid RowDefinitions="Auto,*,Auto" Margin="18">
+    <!-- Header -->
+    <Border Grid.Row="0" Classes="card" Padding="16">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <Border Width="56"
+                Height="56"
+                CornerRadius="12"
+                Background="White"
+                BorderBrush="{DynamicResource StrokeBrush}"
+                BorderThickness="1">
+          <Image Source="avares://MarkdownConverter.Desktop/Assets/md_converter.png" Stretch="Uniform" Margin="6" />
+        </Border>
+
+        <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center" Margin="16,0,16,0">
+          <TextBlock Text="Quick Paste Module" FontSize="20" FontWeight="SemiBold" />
+          <TextBlock Text="Paste your markdown directly to save or export without files" Foreground="{DynamicResource TextMutedBrush}" FontSize="12" />
+        </StackPanel>
+
+        <Border Grid.Column="2" Classes="subtle" VerticalAlignment="Center" Padding="12,6">
+          <TextBlock Text="{Binding StatusText}"
+                     Foreground="{Binding StatusKind, Converter={StaticResource StatusBrush}}"
+                     FontWeight="SemiBold" />
+        </Border>
+      </Grid>
+    </Border>
+
+    <!-- Main Content -->
+    <Grid Grid.Row="1" Margin="0,16,0,12" ColumnDefinitions="2*,18,*">
+      
+      <!-- Left Column: Editor -->
+      <Border Grid.Column="0" Classes="card" Padding="16">
+        <Grid RowDefinitions="Auto,*,Auto">
+          <StackPanel Grid.Row="0" Spacing="10" Margin="0,0,0,12">
+            <TextBlock Text="Document Title" FontWeight="SemiBold" FontSize="15" />
+            <TextBox Text="{Binding Title}" Watermark="Auto-detected from headings..." />
+          </StackPanel>
+
+          <TextBox Grid.Row="1" 
+                   Text="{Binding MarkdownContent}" 
+                   AcceptsReturn="True" 
+                   TextWrapping="Wrap" 
+                   FontFamily="Consolas, Couriser New, Monospace"
+                   Watermark="Paste markdown here..."
+                   VerticalContentAlignment="Top" />
+
+          <Border Grid.Row="2" Classes="subtle" Margin="0,14,0,0" Padding="12">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+              <StackPanel Grid.Column="0" Spacing="6" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Export Format:" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                <ComboBox ItemsSource="{Binding Formats}"
+                          SelectedValue="{Binding SelectedFormat}"
+                          SelectedValueBinding="{Binding Value}"
+                          VerticalAlignment="Center">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock Text="{Binding Label}" />
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+              </StackPanel>
+              
+              <Button Grid.Column="2" Content="Clear" Classes="flat" Command="{Binding ClearEditorCommand}" Margin="8,0,0,0" />
+              <Button Grid.Column="3" Content="Save Only" Command="{Binding SaveCommand}" Margin="8,0,0,0" />
+              <Button Grid.Column="4" Content="Save &amp; Export" Classes="primary" Command="{Binding SaveAndExportCommand}" Margin="8,0,0,0" />
+            </Grid>
+          </Border>
+        </Grid>
+      </Border>
+
+      <!-- Right Column: History -->
+      <Border Grid.Column="2" Classes="card" Padding="16">
+        <Grid RowDefinitions="Auto,Auto,*">
+          <TextBlock Grid.Row="0" Text="History Library" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,12" />
+
+          <TextBox Grid.Row="1" 
+                   Text="{Binding SearchQuery}" 
+                   Watermark="Search past notes..." 
+                   Margin="0,0,0,12" />
+
+          <Border Grid.Row="2" Classes="subtle" Padding="8">
+            <ListBox ItemsSource="{Binding History}" SelectedItem="{Binding SelectedHistoryEntry}">
+              <ListBox.ItemTemplate>
+                <DataTemplate>
+                  <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Title}" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding CreatedAt, StringFormat='{}{0:MMM dd, yyyy}'}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                    
+                    <StackPanel Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                      <Button Content="Load" Command="{Binding $parent[Window].((vm:QuickPasteViewModel)DataContext).LoadEntryCommand}" CommandParameter="{Binding}" Classes="flat" Padding="8,4" FontSize="11" />
+                      <Button Content="Del" Command="{Binding $parent[Window].((vm:QuickPasteViewModel)DataContext).DeleteEntryCommand}" CommandParameter="{Binding}" Classes="flat" Padding="8,4" FontSize="11" Foreground="#FF5555" BorderBrush="#FF5555" />
+                    </StackPanel>
+                  </Grid>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Border>
+        </Grid>
+      </Border>
+      
+    </Grid>
+
+    <!-- Toast Notification -->
+    <Border Grid.Row="2"
+            IsVisible="{Binding IsToastVisible}"
+            Background="{Binding ToastKind, Converter={StaticResource ToastBrush}}"
+            BorderBrush="{DynamicResource StrokeBrush}"
+            BorderThickness="1"
+            CornerRadius="10"
+            Padding="12,8"
+            HorizontalAlignment="Right">
+      <TextBlock Text="{Binding ToastMessage}" Foreground="White" />
+    </Border>
+
+  </Grid>
+</Window>

@@ -100,6 +100,17 @@ public sealed class AvaloniaUiPlatformServices : IUiPlatformServices
         owner.Clipboard.SetTextAsync(text).GetAwaiter().GetResult();
     }
 
+    public async Task<string?> GetClipboardTextAsync()
+    {
+        var owner = _getOwner();
+        if (owner?.Clipboard is null)
+        {
+            return null;
+        }
+
+        return await owner.Clipboard.GetTextAsync();
+    }
+
     public async Task ShowMessageAsync(string message, ToastKind kind)
     {
         var owner = _getOwner();
