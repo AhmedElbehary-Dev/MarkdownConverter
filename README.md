@@ -1,7 +1,13 @@
 # Markdown Converter Pro
 
 <p align="center">
-  <img src="img/md_converter.png" alt="Markdown Converter Pro" width="180">
+  <img src="img/md_converter.png" alt="Markdown Converter Pro" width="120">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet" alt=".NET 10">
+  <img src="https://img.shields.io/badge/Platform-Win%20%7C%20Mac%20%7C%20Linux-lightgrey" alt="Platforms">
+  <a href="LICENSE.txt"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License"></a>
 </p>
 
 <p align="center">
@@ -22,14 +28,11 @@
 
 ## Screenshots
 
-<p align="center">
-  <img src="img/screen_1.png" alt="Main Window" width="420">&nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="img/screen-2.png" alt="Quick Paste" width="420">
-</p>
-<p align="center">
-  <sub>Main Window</sub>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <sub>Quick Paste</sub>
-</p>
+### Main Window
+![Main Window](img/screen_1.png)
+
+### Quick Paste
+![Quick Paste](img/screen-2.png)
 
 ## Quick Start
 
