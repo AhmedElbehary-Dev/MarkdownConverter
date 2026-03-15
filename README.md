@@ -22,9 +22,14 @@
 
 ## Screenshots
 
-| Main Window | Quick Paste |
-|:-----------:|:-----------:|
-| ![Main Window](img/main_screenshot.png) | ![Quick Paste](img/screen-2.png) |
+<p align="center">
+  <img src="img/screen_1.png" alt="Main Window" width="420">&nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="img/screen-2.png" alt="Quick Paste" width="420">
+</p>
+<p align="center">
+  <sub>Main Window</sub>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <sub>Quick Paste</sub>
+</p>
 
 ## Quick Start
 
