@@ -325,6 +325,8 @@ internal static class Program
         public void OpenPathWithShell(string path) => OpenedPaths.Add(path);
 
         public void SetClipboardText(string text) => ClipboardText = text;
+        
+        public Task<string?> GetClipboardTextAsync() => Task.FromResult(ClipboardText);
 
         public Task ShowMessageAsync(string message, ToastKind kind)
         {

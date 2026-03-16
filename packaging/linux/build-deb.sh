@@ -35,12 +35,12 @@ EOF
 
 # Copy published application files to /usr/lib/markdownconverter
 # Assuming this script is run after "dotnet publish -c Release -r linux-x64 --self-contained true"
-PUBLISH_DIR="../../src/MarkdownConverter.Desktop/bin/Release/net10.0/linux-x64/publish"
+PUBLISH_DIR="../../bin/Release/net10.0/linux-x64/publish"
 cp -r $PUBLISH_DIR/* "$PACKAGE_NAME/usr/lib/$APP_NAME/"
 
 # Create a symlink in /usr/bin to the executable
-ln -s "/usr/lib/$APP_NAME/MarkdownConverter.Desktop" "$PACKAGE_NAME/usr/bin/$APP_NAME"
-chmod +x "$PACKAGE_NAME/usr/lib/$APP_NAME/MarkdownConverter.Desktop"
+ln -s "/usr/lib/$APP_NAME/MarkdownConverter" "$PACKAGE_NAME/usr/bin/$APP_NAME"
+chmod +x "$PACKAGE_NAME/usr/lib/$APP_NAME/MarkdownConverter"
 
 # Copy the desktop file (from the existing .github/workflows directory or create one)
 cat <<EOF > "$PACKAGE_NAME/usr/share/applications/markdown-converter.desktop"
