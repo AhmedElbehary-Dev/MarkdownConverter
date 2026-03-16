@@ -5,9 +5,21 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/AhmedElbehary-Dev/MarkdownConverter/actions/workflows/ci.yml"><img src="https://github.com/AhmedElbehary-Dev/MarkdownConverter/actions/workflows/ci.yml/badge.svg" alt="CI Status"></a>
+  <a href="https://github.com/AhmedElbehary-Dev/MarkdownConverter/actions/workflows/release.yml"><img src="https://github.com/AhmedElbehary-Dev/MarkdownConverter/actions/workflows/release.yml/badge.svg" alt="Release Status"></a>
+  <a href="https://github.com/AhmedElbehary-Dev/MarkdownConverter/releases"><img src="https://img.shields.io/github/v/release/AhmedElbehary-Dev/MarkdownConverter" alt="Latest Version"></a>
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet" alt=".NET 10">
   <img src="https://img.shields.io/badge/Platform-Win%20%7C%20Mac%20%7C%20Linux-lightgrey" alt="Platforms">
   <a href="LICENSE.txt"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License"></a>
+  <a href="https://github.com/AhmedElbehary-Dev/MarkdownConverter/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/AhmedElbehary-Dev/MarkdownConverter/stargazers"><img src="https://img.shields.io/github/stars/AhmedElbehary-Dev/MarkdownConverter?style=social" alt="GitHub stars"></a>
+  <a href="https://github.com/AhmedElbehary-Dev/MarkdownConverter/network/members"><img src="https://img.shields.io/github/forks/AhmedElbehary-Dev/MarkdownConverter?style=social" alt="GitHub forks"></a>
 </p>
 
 <p align="center">
