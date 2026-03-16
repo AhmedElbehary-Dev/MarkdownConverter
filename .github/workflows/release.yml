@@ -69,8 +69,35 @@ jobs:
           name: linux-installers
           path: release/*.deb
 
+  build-macos-dmg:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Publish macOS-x64
+        run: dotnet publish MarkdownConverter.csproj -c Release -r osx-x64 --self-contained true
+
+      - name: Build macOS DMG
+        run: |
+          mkdir -p release
+          chmod +x ./packaging/macos/build-dmg.sh
+          cd ./packaging/macos
+          ./build-dmg.sh
+
+      - name: Upload macOS Output
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-installers
+          path: release/*.dmg
+
   release:
-    needs: [build-windows-exe-msi, build-linux-deb]
+    needs: [build-windows-exe-msi, build-linux-deb, build-macos-dmg]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -88,4 +115,5 @@ jobs:
             artifacts/MarkdownConverter-Setup-x64.exe
             artifacts/MarkdownConverter.msi
             artifacts/*.deb
+            artifacts/*.dmg
           generate_release_notes: true
