@@ -6,28 +6,86 @@ on:
       - 'v*'
 
 jobs:
-  release:
+  build-windows-exe-msi:
     runs-on: windows-latest
-    
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-    
-    - name: Publish Windows Standalone Executable
-      run: dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Publish Win-x64
+        run: dotnet publish MarkdownConverter.csproj -c Release -r win-x64 --self-contained true
+
+      - name: Build Windows EXE with Inno Setup
+        uses: minicomp/setup-inno-setup@v1
       
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
-      with:
-        name: Markdown Converter Pro ${{ github.ref_name }}
-        tag_name: ${{ github.ref_name }}
-        draft: false
-        prerelease: false
-        generate_release_notes: true
-        files: |
-          src/MarkdownConverter.Desktop/bin/Release/net10.0/win-x64/publish/MarkdownConverter.Desktop.exe
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Compile Inno Setup Script
+        run: |
+          mkdir release -ea 0
+          iscc .\packaging\windows\setup.iss
+
+      - name: Setup WiX toolset
+        run: dotnet tool install --global wix
+
+      - name: Build Windows MSI with WiX Toolset
+        run: wix build .\packaging\windows\setup.wxs -o .\release\MarkdownConverter.msi
+        
+      - name: Upload Windows Output
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installers
+          path: |
+            release\MarkdownConverter-Setup-x64.exe
+            release\MarkdownConverter.msi
+
+  build-linux-deb:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Publish Linux-x64
+        run: dotnet publish MarkdownConverter.csproj -c Release -r linux-x64 --self-contained true
+
+      - name: Build Debian Package
+        run: |
+          mkdir -p release
+          chmod +x ./packaging/linux/build-deb.sh
+          cd ./packaging/linux
+          ./build-deb.sh
+
+      - name: Upload Debian Output
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-installers
+          path: release/*.deb
+
+  release:
+    needs: [build-windows-exe-msi, build-linux-deb]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/MarkdownConverter-Setup-x64.exe
+            artifacts/MarkdownConverter.msi
+            artifacts/*.deb
+          generate_release_notes: true
