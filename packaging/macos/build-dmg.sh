@@ -3,12 +3,12 @@ set -e
 
 # Configuration
 APP_NAME="MarkdownConverter"
-VERSION="2.0.3"
+VERSION="${1:-1.0.0}"
 APP_BUNDLE="$APP_NAME.app"
 PUBLISH_DIR="../../bin/Release/net10.0/osx-x64/publish"
 OUTPUT_DIR="../../release"
 
-echo "=== Building macOS App Bundle ==="
+echo "=== Building macOS App Bundle (Version $VERSION) ==="
 
 # Clean previous builds
 rm -rf "$APP_BUNDLE"
@@ -19,8 +19,11 @@ mkdir -p "$OUTPUT_DIR"
 mkdir -p "$APP_BUNDLE/Contents/MacOS"
 mkdir -p "$APP_BUNDLE/Contents/Resources"
 
-# Copy Info.plist
+# Copy and update Info.plist
 cp Info.plist "$APP_BUNDLE/Contents/"
+# Strip 'v' prefix if present for Info.plist version strings
+CLEAN_VERSION=$(echo $VERSION | sed 's/^v//')
+sed -i '' "s/2.0.3/$CLEAN_VERSION/g" "$APP_BUNDLE/Contents/Info.plist"
 
 # Copy published files
 echo "Copying published files from $PUBLISH_DIR..."

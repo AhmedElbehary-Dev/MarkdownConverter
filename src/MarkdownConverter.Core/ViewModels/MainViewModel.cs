@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Reflection;
 
 namespace MarkdownConverter.ViewModels
 {
@@ -85,7 +86,29 @@ namespace MarkdownConverter.ViewModels
 
         public string AppTitle => "Markdown Converter Pro";
 
-        public string AppVersion => "v1";
+        public string AppVersion
+        {
+            get
+            {
+                var asm = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+                var version = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+                
+                if (string.IsNullOrWhiteSpace(version))
+                {
+                    version = asm.GetName().Version?.ToString(3);
+                }
+                else
+                {
+                    int plusIndex = version.IndexOf('+');
+                    if (plusIndex > 0)
+                    {
+                        version = version.Substring(0, plusIndex);
+                    }
+                }
+
+                return string.IsNullOrEmpty(version) ? "v1.0.0" : (version.StartsWith("v") ? version : "v" + version);
+            }
+        }
 
         public ObservableCollection<FormatOption> Formats { get; }
 

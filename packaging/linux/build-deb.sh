@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-VERSION="2.0.2"
+VERSION="${1:-1.0.0}"
+VERSION="${VERSION#v}" # Strip leading 'v' if present
 ARCH="amd64"
 APP_NAME="markdownconverter"
 PACKAGE_NAME="${APP_NAME}_${VERSION}_${ARCH}"
