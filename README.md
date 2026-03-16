@@ -15,6 +15,7 @@
   <img src="https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet" alt=".NET 10">
   <img src="https://img.shields.io/badge/Platform-Win%20%7C%20Mac%20%7C%20Linux-lightgrey" alt="Platforms">
   <img src="https://img.shields.io/badge/Security-Anti--Malware%20Checked-brightgreen?logo=googlechrome&logoColor=white" alt="Malware Free">
+  <a href="SECURITY.md"><img src="https://img.shields.io/badge/Security-Policy-blue" alt="Security Policy"></a>
   <a href="LICENSE.txt"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License"></a>
   <a href="https://github.com/AhmedElbehary-Dev/MarkdownConverter/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
 </p>
