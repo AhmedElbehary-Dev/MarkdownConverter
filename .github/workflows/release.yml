@@ -20,8 +20,8 @@ jobs:
       - name: Publish Win-x64
         run: dotnet publish MarkdownConverter.csproj -c Release -r win-x64 --self-contained true
 
-      - name: Build Windows EXE with Inno Setup
-        uses: minicomp/setup-inno-setup@v1
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress
       
       - name: Compile Inno Setup Script
         run: |

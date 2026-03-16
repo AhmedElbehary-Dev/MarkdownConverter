@@ -8,8 +8,12 @@ PACKAGE_NAME="${APP_NAME}_${VERSION}_${ARCH}"
 
 echo "Building Debian package: $PACKAGE_NAME"
 
+# Clean up any previous build artifacts
+rm -rf "$PACKAGE_NAME"
+
 # Create directories
 mkdir -p "$PACKAGE_NAME/DEBIAN"
+chmod 0755 "$PACKAGE_NAME/DEBIAN"
 mkdir -p "$PACKAGE_NAME/usr/bin"
 mkdir -p "$PACKAGE_NAME/usr/share/applications"
 mkdir -p "$PACKAGE_NAME/usr/share/pixmaps"
@@ -31,12 +35,12 @@ EOF
 
 # Copy published application files to /usr/lib/markdownconverter
 # Assuming this script is run after "dotnet publish -c Release -r linux-x64 --self-contained true"
-PUBLISH_DIR="../../bin/Release/net10.0/linux-x64/publish"
+PUBLISH_DIR="../../src/MarkdownConverter.Desktop/bin/Release/net10.0/linux-x64/publish"
 cp -r $PUBLISH_DIR/* "$PACKAGE_NAME/usr/lib/$APP_NAME/"
 
 # Create a symlink in /usr/bin to the executable
-ln -s "/usr/lib/$APP_NAME/MarkdownConverter" "$PACKAGE_NAME/usr/bin/$APP_NAME"
-chmod +x "$PACKAGE_NAME/usr/bin/$APP_NAME"
+ln -s "/usr/lib/$APP_NAME/MarkdownConverter.Desktop" "$PACKAGE_NAME/usr/bin/$APP_NAME"
+chmod +x "$PACKAGE_NAME/usr/lib/$APP_NAME/MarkdownConverter.Desktop"
 
 # Copy the desktop file (from the existing .github/workflows directory or create one)
 cat <<EOF > "$PACKAGE_NAME/usr/share/applications/markdown-converter.desktop"
