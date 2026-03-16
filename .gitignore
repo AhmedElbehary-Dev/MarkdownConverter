@@ -361,3 +361,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# --- MarkdownConverter Specific ---
+# Linux packaging build directories
+packaging/linux/*/
+
+# Avalonia temporary build files
+**/.avalonia-build-tasks/
+
+# Runtimes copied during build
+**/[Rr]untimes/

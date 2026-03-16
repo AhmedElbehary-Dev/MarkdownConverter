@@ -19,6 +19,6 @@
 ## 4. Verification
 - [x] Verify Windows installer scripts build locally (`.\build-installers.ps1` runs WiX and Inno Setup).
 - [x] Both `.msi` and `.exe` artifacts exist in `./release`.
-- [ ] Instruct user to test auto-uninstall capability by running the new installer while the old version is installed.
-- [ ] Instruct user to trigger CI/CD actions to verify GitHub Actions workflow runs correctly.
-- [ ] Verify released artifacts are correctly installed and launched.
+- [x] Instruct user to test auto-uninstall capability by running the new installer while the old version is installed.
+- [x] Instruct user to trigger CI/CD actions to verify GitHub Actions workflow runs correctly.
+- [x] Verify released artifacts are correctly installed and launched.
