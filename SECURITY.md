@@ -13,7 +13,7 @@ Specifically mention which versions of the project are currently being supported
 
 We take the security of **Markdown Converter Pro** seriously. If you believe you have found a security vulnerability, please do NOT report it via a public issue. Instead, follow these steps:
 
-1. **Email us**: Please send a detailed report to `security@ahmedelbehary.dev` (or the maintainer's email).
+1. **Email us**: Please send a detailed report to `as.elbehary@gmail.com` (or the maintainer's email).
 2. **Details**: Include a description of the vulnerability, steps to reproduce, and any potential impact you've identified.
 3. **Response**: We will acknowledge your report within 48 hours and provide a timeline for a fix.
 
