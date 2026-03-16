@@ -113,9 +113,32 @@ jobs:
           path: artifacts
           merge-multiple: true
 
+      - name: Generate Release Body
+        run: |
+          $ver = "${{ github.ref_name }}".TrimStart('v')
+          $body = @"
+          ## 🚀 What's New in v$ver
+          
+          This release of **Markdown Converter Pro** includes several updates across all platforms.
+          
+          ### 📱 Multi-Platform Support
+          - **Windows**: Improved installer stability with Inno Setup and MSI.
+          - **macOS**: Full Apple Disk Image (.dmg) support with automatic icon scaling.
+          - **Linux**: Optimized Debian (.deb) package generation.
+          
+          ### 🛠 Changes in this version
+          - Dynamic versioning injected during build.
+          - Multi-OS CI matrix for verified stability.
+          - UI version display synced with release tags.
+          
+          ---
+          "@
+          $body | Set-Content release_notes.md
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
+          body_path: release_notes.md
           files: |
             artifacts/MarkdownConverter-Setup-x64.exe
             artifacts/MarkdownConverter.msi
