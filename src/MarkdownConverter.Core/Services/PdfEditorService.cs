@@ -65,6 +65,8 @@ namespace MarkdownConverter.Services
             }
 
             var newFileName = $"{fileNameWithoutExt}_deleted_{deletedPagesStr}{ext}";
+            // Trim leading separators to prevent Path.Combine from dropping the directory argument
+            newFileName = newFileName.TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             var outputFilePath = Path.Combine(directory, newFileName);
 
             using (var inputDocument = PdfReader.Open(inputFilePath, PdfDocumentOpenMode.Import))
