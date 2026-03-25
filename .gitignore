@@ -370,4 +370,6 @@ packaging/linux/*/
 **/.avalonia-build-tasks/
 
 # Runtimes copied during build
-**/[Rr]untimes/
+**/[Rr]untimes/
+tasks/lessons.md
+tasks/todo.md

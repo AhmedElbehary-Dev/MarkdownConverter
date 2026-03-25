@@ -164,8 +164,14 @@ public partial class MainWindow : Window
         var services = new AvaloniaUiPlatformServices(() => MarkdownConverter.Desktop.App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop ? desktop.MainWindow : this);
         var storage = new MarkdownConverter.Services.QuickPasteStorageService();
         var vm = new QuickPasteViewModel(new ConversionService(), services, storage);
-        
+
         var window = new MarkdownConverter.Desktop.UI.QuickPasteWindow(vm);
         window.Show(this);
     }
-}
+
+    private void PdfEditor_Click(object? sender, RoutedEventArgs e)
+    {
+        var window = new MarkdownConverter.Desktop.UI.PdfEditorWindow();
+        window.Show(this);
+    }
+    }

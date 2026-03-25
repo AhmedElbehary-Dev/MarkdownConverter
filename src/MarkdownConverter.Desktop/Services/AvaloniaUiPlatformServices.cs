@@ -49,6 +49,34 @@ public sealed class AvaloniaUiPlatformServices : IUiPlatformServices
         return ToLocalPath(files.FirstOrDefault());
     }
 
+    public async Task<string?> PickPdfFileAsync()
+    {
+        var owner = _getOwner();
+        if (owner?.StorageProvider is null)
+        {
+            return null;
+        }
+
+        var files = await owner.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Select PDF File",
+            AllowMultiple = false,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("PDF Files")
+                {
+                    Patterns = ["*.pdf"]
+                },
+                new FilePickerFileType("All Files")
+                {
+                    Patterns = ["*"]
+                }
+            ]
+        });
+
+        return ToLocalPath(files.FirstOrDefault());
+    }
+
     public async Task<string?> PickOutputFolderAsync(string? initialPath)
     {
         var owner = _getOwner();

@@ -58,9 +58,28 @@ if [ -f "$ICON_SOURCE" ]; then
 fi
 
 echo "=== Creating Disk Image (DMG) ==="
+
+# Codesigning Step (Optional but recommended for distribution)
+if [ ! -z "$CODESIGN_IDENTITY" ]; then
+    echo "Signing App Bundle with identity: $CODESIGN_IDENTITY"
+    
+    # 1. Sign any helper binaries or frameworks (if any exist)
+    # We use --options runtime for Hardened Runtime (required for notarization)
+    find "$APP_BUNDLE" -name "*.dylib" -or -name "*.so" | xargs codesign --force --options runtime --timestamp --sign "$CODESIGN_IDENTITY" || true
+    
+    # 2. Sign the main executable
+    codesign --force --options runtime --timestamp --sign "$CODESIGN_IDENTITY" "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
+    
+    # 3. Sign the app bundle itself
+    codesign --force --options runtime --timestamp --sign "$CODESIGN_IDENTITY" "$APP_BUNDLE"
+    
+    echo "Verifying signature..."
+    codesign --verify --verbose "$APP_BUNDLE"
+else
+    echo "Warning: CODESIGN_IDENTITY not set. Skipping codesigning. App will be flagged as 'damaged' on other machines."
+fi
+
 # We use hdiutil which is standard on macOS
-# In a real CI environment, you might want more fancy DMG layouts, 
-# but this is the functional equivalent of the .deb/.msi builds.
 hdiutil create -volname "$APP_NAME" -srcfolder "$APP_BUNDLE" -ov -format UDZO "$APP_NAME.dmg"
 
 mv "$APP_NAME.dmg" "$OUTPUT_DIR/"

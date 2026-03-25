@@ -1,0 +1,127 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:MarkdownConverter.ViewModels;assembly=MarkdownConverter.Core"
+        x:Class="MarkdownConverter.Desktop.UI.PdfEditorWindow"
+        mc:Ignorable="d"
+        Width="1040"
+        Height="720"
+        MinWidth="900"
+        MinHeight="600"
+        Title="PDF Editor - Markdown Converter Pro"
+        Icon="avares://MarkdownConverter.Desktop/Assets/md_converter.ico"
+        Background="{DynamicResource AppBgBrush}">
+  
+  <Window.Styles>
+    <Style Selector="TextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource StrokeBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="14" />
+    </Style>
+
+    <Style Selector="Border.subtle">
+      <Setter Property="Background" Value="{DynamicResource PanelAltBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource StrokeBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+    </Style>
+
+    <Style Selector="Button">
+      <Setter Property="Background" Value="{DynamicResource PanelInsetBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource StrokeBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="12,8" />
+    </Style>
+
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+      <Setter Property="Foreground" Value="#091318" />
+      <Setter Property="BorderBrush" Value="#34D2D9" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    
+    <Style Selector="CheckBox">
+      <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="ListBox">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="ListBoxItem">
+      <Setter Property="Padding" Value="8" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Margin" Value="4" />
+    </Style>
+    <Style Selector="ListBoxItem:selected">
+      <Setter Property="Background" Value="{DynamicResource PanelInsetBrush}" />
+    </Style>
+  </Window.Styles>
+
+  <Grid RowDefinitions="Auto,*,Auto" Margin="18">
+    <!-- Header -->
+    <Border Grid.Row="0" Classes="card" Padding="16">
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+        <Border Width="56" Height="56" CornerRadius="12" Background="White" BorderBrush="{DynamicResource StrokeBrush}" BorderThickness="1">
+          <Image Source="avares://MarkdownConverter.Desktop/Assets/md_converter.png" Stretch="Uniform" Margin="6" />
+        </Border>
+
+        <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center" Margin="16,0,16,0">
+          <TextBlock Text="PDF Editor Module" FontSize="20" FontWeight="SemiBold" />
+          <TextBlock Text="Remove pages from a PDF document" Foreground="{DynamicResource TextMutedBrush}" FontSize="12" />
+        </StackPanel>
+
+        <Button Grid.Column="2" Content="Open PDF" Classes="primary" Command="{Binding BrowsePdfCommand}" VerticalAlignment="Center" Margin="0,0,16,0" />
+      </Grid>
+    </Border>
+
+    <!-- Main Content -->
+    <Border Grid.Row="1" Classes="card" Margin="0,16,0,12" Padding="16">
+      <Grid RowDefinitions="Auto,*">
+        <TextBlock Grid.Row="0" Text="{Binding FilePath}" TextWrapping="Wrap" Margin="0,0,0,12" Foreground="{DynamicResource TextSecondaryBrush}" />
+        <TextBlock Grid.Row="0" Text="No file selected." IsVisible="{Binding !FilePath.Length}" Margin="0,0,0,12" Foreground="{DynamicResource TextSecondaryBrush}" />
+        <TextBlock Grid.Row="0" Text="Loading pages..." IsVisible="{Binding IsLoading}" HorizontalAlignment="Right" Margin="0,0,0,12" />
+
+        <ScrollViewer Grid.Row="1">
+          <ItemsControl ItemsSource="{Binding Pages}">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border BorderBrush="{DynamicResource StrokeBrush}" BorderThickness="1" CornerRadius="8" Margin="8" Padding="8" Background="{DynamicResource PanelAltBrush}" Width="200">
+                  <StackPanel Spacing="8">
+                    <TextBlock Text="{Binding PageNumber, StringFormat='Page {0}'}" HorizontalAlignment="Center" FontWeight="SemiBold" />
+                    <Image Source="{Binding UiThumbnail}" Height="250" Stretch="Uniform" />
+                    <CheckBox Content="Delete this page" IsChecked="{Binding IsSelected}" HorizontalAlignment="Center" />
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </Grid>
+    </Border>
+
+    <!-- Footer -->
+    <Border Grid.Row="2" Classes="subtle" Padding="16">
+      <Grid ColumnDefinitions="*,Auto,Auto">
+        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+          <TextBlock Text="{Binding StatusText}" Foreground="{DynamicResource TextSecondaryBrush}" />
+          <TextBlock Text="{Binding ExportSuccessMessage}" Foreground="{DynamicResource AccentBrush}" TextWrapping="Wrap" />
+        </StackPanel>
+        
+        <Button Grid.Column="2" Content="Delete Selected Pages &amp; Export" Classes="primary" Command="{Binding DeleteSelectedPagesCommand}" Margin="8,0,0,0" IsEnabled="{Binding !IsExporting}" />
+      </Grid>
+    </Border>
+  </Grid>
+</Window>

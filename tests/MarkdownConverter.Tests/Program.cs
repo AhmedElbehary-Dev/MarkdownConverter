@@ -320,6 +320,8 @@ internal static class Program
 
         public Task<string?> PickMarkdownFileAsync() => Task.FromResult(NextMarkdownPath);
 
+        public Task<string?> PickPdfFileAsync() => Task.FromResult<string?>(null);
+
         public Task<string?> PickOutputFolderAsync(string? initialPath) => Task.FromResult(NextOutputFolder);
 
         public void OpenPathWithShell(string path) => OpenedPaths.Add(path);
