@@ -94,9 +94,11 @@ jobs:
         shell: pwsh
         run: |
           $ver = "${{ github.ref_name }}".TrimStart('v')
-          $body = @"
-          ## 🚀 What's New in v$ver
+          # Find the previous tag to create comparison link
+          $prevTag = $(git describe --tags --abbrev=0 ${{ github.ref_name }}^ 2>$null)
+          if (!$prevTag) { $prevTag = "v2.0.5" } # Fallback
           
+          $body = @"
           This release of **Markdown Converter Pro** includes several updates across all platforms.
           
           ### 📱 Multi-Platform Support
@@ -109,15 +111,17 @@ jobs:
           - UI version display synced with release tags.
           
           ---
+          **Full Changelog**: https://github.com/AhmedElbehary-Dev/MarkdownConverter/compare/$($prevTag)...${{ github.ref_name }}
           "@
           $body | Set-Content release_notes.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          name: "🚀 What's New in ${{ github.ref_name }}"
           body_path: release_notes.md
           files: |
             artifacts/MarkdownConverter-Setup-x64.exe
             artifacts/MarkdownConverter.msi
             artifacts/*.deb
-          generate_release_notes: true
+          generate_release_notes: false
