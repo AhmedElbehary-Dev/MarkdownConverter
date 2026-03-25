@@ -125,7 +125,7 @@ internal static class Program
 
         Assert(vm.SelectedMarkdownPath == string.Empty, "SelectedMarkdownPath should clear.");
         Assert(vm.OutputFilePath == string.Empty, "OutputFilePath should clear.");
-        Assert(vm.Progress == 0, "Progress should reset.");
+        Assert(Math.Abs(vm.Progress - 0) < 1e-6, "Progress should reset.");
         Assert(vm.StatusText == "Ready", "StatusText should reset.");
         Assert(vm.StatusKind == StatusKind.Neutral, "StatusKind should reset.");
 
