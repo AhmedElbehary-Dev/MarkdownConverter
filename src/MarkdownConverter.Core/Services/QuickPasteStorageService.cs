@@ -145,18 +145,12 @@ namespace MarkdownConverter.Services
             if (string.IsNullOrWhiteSpace(content)) return "Untitled";
 
             var lines = content.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            foreach (var line in lines)
-            {
-                if (line.StartsWith("# "))
-                {
-                    return line.Substring(2).Trim();
-                }
-            }
-            
-            // Fallback: first non-empty line
-            var firstLine = lines.FirstOrDefault(l => !string.IsNullOrWhiteSpace(l))?.Trim() ?? "Untitled";
-            if (firstLine.Length > 50) firstLine = firstLine.Substring(0, 50) + "...";
-            return firstLine;
+            var title = lines.FirstOrDefault(l => l.StartsWith("# "))?.Substring(2).Trim() 
+                      ?? lines.FirstOrDefault(l => !string.IsNullOrWhiteSpace(l))?.Trim() 
+                      ?? "Untitled";
+
+            if (title.Length > 50) title = title.Substring(0, 50) + "...";
+            return title;
         }
     }
 }

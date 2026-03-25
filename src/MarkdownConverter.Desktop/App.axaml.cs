@@ -27,7 +27,7 @@ public partial class App : Application
             // Prefer early failure for missing native PDF runtime, but keep app booting so DOCX/XLSX remain usable.
             pdfLoader.EnsureLoaded();
         }
-        catch (Exception)
+        catch (Exception ex) when (ex is DllNotFoundException or BadImageFormatException or InvalidOperationException)
         {
             // PDF conversion will surface a detailed error on first use if runtime files are missing.
         }

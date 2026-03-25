@@ -326,13 +326,9 @@ public sealed class PdfExporter
 
         foreach (var dir in path.Split(pathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
-            foreach (var extension in extensions)
+            if (extensions.Select(ext => Path.Join(dir, commandName + ext)).Any(File.Exists))
             {
-                var candidate = Path.Join(dir, commandName + extension);
-                if (File.Exists(candidate))
-                {
-                    return true;
-                }
+                return true;
             }
         }
 
@@ -348,7 +344,7 @@ public sealed class PdfExporter
                 File.Delete(path);
             }
         }
-        catch
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             // Best-effort cleanup only.
         }

@@ -26,19 +26,19 @@ internal static class Program
         await RunAsync(nameof(BaselineScaffold_FoldersExist), BaselineScaffold_FoldersExist);
 
         Console.WriteLine();
-        if (Failures.Count == 0)
+        if (Failures.Any())
         {
-            Console.WriteLine("All test harness checks passed.");
-            return 0;
+            Console.WriteLine($"FAILED ({Failures.Count}):");
+            foreach (var failure in Failures)
+            {
+                Console.WriteLine($"- {failure}");
+            }
+
+            return 1;
         }
 
-        Console.WriteLine($"FAILED ({Failures.Count}):");
-        foreach (var failure in Failures)
-        {
-            Console.WriteLine($"- {failure}");
-        }
-
-        return 1;
+        Console.WriteLine("All test harness checks passed.");
+        return 0;
     }
 
     private static async Task RunAsync(string name, Func<Task> test)
@@ -48,7 +48,7 @@ internal static class Program
             await test();
             Console.WriteLine($"PASS {name}");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             Failures.Add($"{name}: {ex.Message}");
             Console.WriteLine($"FAIL {name}");
@@ -287,21 +287,9 @@ internal static class Program
                 .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             : [string.Empty];
 
-        foreach (var command in commandNames)
-        {
-            foreach (var dir in pathDirs)
-            {
-                foreach (var ext in extensions)
-                {
-                    if (File.Exists(Path.Join(dir, command + ext)))
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
+        return commandNames.Any(command =>
+            pathDirs.SelectMany(dir => extensions.Select(ext => Path.Join(dir, command + ext)))
+                    .Any(File.Exists));
     }
 
     private sealed class FakeUiPlatformServices : IUiPlatformServices

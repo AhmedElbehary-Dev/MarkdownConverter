@@ -200,13 +200,9 @@ public sealed class XlsxExporter
                 builder.Append(fencedCode.Lines.ToString());
                 break;
             case ContainerBlock container:
-                foreach (var child in container)
+                foreach (var child in container.Select(ExtractBlockText).Where(text => !string.IsNullOrWhiteSpace(text)))
                 {
-                    var text = ExtractBlockText(child);
-                    if (!string.IsNullOrWhiteSpace(text))
-                    {
-                        builder.Append(text).Append(' ');
-                    }
+                    builder.Append(child).Append(' ');
                 }
 
                 break;
@@ -224,7 +220,7 @@ public sealed class XlsxExporter
             switch (inline)
             {
                 case LiteralInline literal:
-                    builder.Append(literal.Content.ToString());
+                    builder.Append(literal.Content);
                     break;
                 case CodeInline codeInline:
                     builder.Append(codeInline.Content);

@@ -106,18 +106,18 @@ internal static class LinuxDesktopIntegration
         public IntPtr res_class;
     }
 
-    [DllImport("libX11")]
+    [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     private static extern IntPtr XOpenDisplay(string? display_name);
 
-    [DllImport("libX11")]
+    [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     private static extern int XCloseDisplay(IntPtr display);
 
-    [DllImport("libX11")]
+    [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     private static extern IntPtr XAllocClassHint();
 
-    [DllImport("libX11")]
+    [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     private static extern int XSetClassHint(IntPtr display, IntPtr window, IntPtr class_hints);
 
-    [DllImport("libX11")]
+    [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     private static extern int XFree(IntPtr data);
 }

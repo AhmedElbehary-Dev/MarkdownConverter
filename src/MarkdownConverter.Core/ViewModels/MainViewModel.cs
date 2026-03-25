@@ -402,13 +402,13 @@ namespace MarkdownConverter.ViewModels
                     {
                         _uiPlatformServices.OpenPathWithShell(OutputFilePath);
                     }
-                    catch
+                    catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or System.IO.IOException)
                     {
                         ShowToast("Could not open the output file.", ToastKind.Error);
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 StatusText = "Conversion failed.";
                 StatusKind = StatusKind.Error;

@@ -200,7 +200,7 @@ namespace MarkdownConverter.ViewModels
                     ShowToast("Auto-filled from clipboard", ViewModels.ToastKind.Success);
                 }
             }
-            catch { /* Ignore clipboard errors on load */ }
+            catch (Exception ex) when (ex is not OperationCanceledException) { /* Ignore clipboard errors on load */ }
         }
 
         private bool IsMarkdownLikely(string text)
@@ -237,7 +237,7 @@ namespace MarkdownConverter.ViewModels
                 StatusText = "Saved";
                 StatusKind = StatusKind.Success;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 StatusText = "Save failed";
                 StatusKind = StatusKind.Error;
@@ -280,7 +280,7 @@ namespace MarkdownConverter.ViewModels
                 StatusKind = StatusKind.Success;
                 await _uiPlatformServices.ShowMessageAsync("Export successful! Saved to:\\n" + outputPath, ViewModels.ToastKind.Success);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 StatusText = "Export failed";
                 StatusKind = StatusKind.Error;

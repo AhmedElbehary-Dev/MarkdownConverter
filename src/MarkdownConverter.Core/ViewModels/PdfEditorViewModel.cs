@@ -103,7 +103,7 @@ namespace MarkdownConverter.ViewModels
                 });
                 StatusText = $"Loaded {Pages.Count} pages.";
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 StatusText = $"Error loading PDF: {ex.Message}";
             }
@@ -135,7 +135,7 @@ namespace MarkdownConverter.ViewModels
                 ExportSuccessMessage = $"Saved to: {outputPath}";
                 StatusText = "Export successful.";
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 StatusText = $"Error exporting PDF: {ex.Message}";
             }

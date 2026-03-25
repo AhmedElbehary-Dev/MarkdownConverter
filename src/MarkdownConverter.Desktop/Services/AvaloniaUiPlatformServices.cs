@@ -157,7 +157,7 @@ public sealed class AvaloniaUiPlatformServices : IUiPlatformServices
                     await ShowMessageAsync(message, kind);
                     tcs.TrySetResult(null);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex is not OperationCanceledException)
                 {
                     tcs.TrySetException(ex);
                 }

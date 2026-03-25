@@ -39,7 +39,7 @@ namespace MarkdownConverter.Desktop.UI
                         {
                             item.UiThumbnail = CreateBitmapFromBgra(item.Image);
                         }
-                        catch (Exception ex)
+                        catch (Exception ex) when (ex is not OperationCanceledException)
                         {
                             // In case of any mapping or memory errors
                             System.Diagnostics.Debug.WriteLine($"Failed to create bitmap: {ex.Message}");
