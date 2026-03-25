@@ -58,7 +58,8 @@ namespace MarkdownConverter.Services
             if (string.IsNullOrWhiteSpace(safeTitle)) safeTitle = "Untitled";
 
             var fileName = $"{safeTitle}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.md";
-            var filePath = Path.Combine(_storageDir, fileName);
+            var safeFileName = fileName.TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            var filePath = Path.Combine(_storageDir, safeFileName);
 
             if (!Directory.Exists(_storageDir)) Directory.CreateDirectory(_storageDir);
 
@@ -87,7 +88,8 @@ namespace MarkdownConverter.Services
             if (entry == null) return;
 
             entry.Title = title;
-            var filePath = Path.Combine(_storageDir, entry.FileName);
+            var safeFileName = entry.FileName.TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            var filePath = Path.Combine(_storageDir, safeFileName);
             
             await File.WriteAllTextAsync(filePath, markdownContent);
             entry.FileSizeBytes = new FileInfo(filePath).Length;
@@ -111,7 +113,8 @@ namespace MarkdownConverter.Services
             var entry = _cache.FirstOrDefault(e => e.Id == id);
             if (entry == null) return null;
 
-            var filePath = Path.Combine(_storageDir, entry.FileName);
+            var safeFileName = entry.FileName.TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            var filePath = Path.Combine(_storageDir, safeFileName);
             if (File.Exists(filePath))
             {
                 return await File.ReadAllTextAsync(filePath);
@@ -124,7 +127,8 @@ namespace MarkdownConverter.Services
             var entry = _cache.FirstOrDefault(e => e.Id == id);
             if (entry == null) return;
 
-            var filePath = Path.Combine(_storageDir, entry.FileName);
+            var safeFileName = entry.FileName.TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            var filePath = Path.Combine(_storageDir, safeFileName);
             if (File.Exists(filePath))
             {
                 File.Delete(filePath);

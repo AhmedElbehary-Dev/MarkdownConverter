@@ -79,11 +79,13 @@ public sealed class RuntimePdfNativeLibraryLoader : IPdfNativeLibraryLoader
         var paths = new string[ridCandidates.Length + 1];
         for (var i = 0; i < ridCandidates.Length; i++)
         {
-            paths[i] = Path.Combine(baseDir, "runtimes", ridCandidates[i], "native", libraryFileName);
+            var subPath = Path.Combine("runtimes", ridCandidates[i], "native", libraryFileName).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            paths[i] = Path.Combine(baseDir, subPath);
         }
 
         // Fallback: app-local native file.
-        paths[^1] = Path.Combine(baseDir, libraryFileName);
+        var safeLibName = libraryFileName.TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        paths[^1] = Path.Combine(baseDir, safeLibName);
         return paths;
     }
 
