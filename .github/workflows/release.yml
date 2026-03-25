@@ -78,68 +78,8 @@ jobs:
           name: linux-installers
           path: release/*.deb
 
-  build-macos-dmg:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 10.0.x
-
-      - name: Publish macOS-x64
-        run: |
-          ver=$(echo "${{ github.ref_name }}" | sed 's/^v//')
-          dotnet publish MarkdownConverter.csproj -c Release -r osx-x64 --self-contained true /p:Version=$ver /p:InformationalVersion=${{ github.ref_name }}
-
-      - name: Build macOS DMG
-        env:
-          CODESIGN_IDENTITY: "Developer ID Application"
-          KEYCHAIN_PWD: ${{ github.run_id }}
-        run: |
-          mkdir -p release
-          chmod +x ./packaging/macos/build-dmg.sh
-          
-          # Import certificate if available
-          if [ ! -z "${{ secrets.MACOS_CERTIFICATE }}" ]; then
-            echo "Importing certificate..."
-            echo "${{ secrets.MACOS_CERTIFICATE }}" | base64 --decode > certificate.p12
-            security create-keychain -p "$KEYCHAIN_PWD" build.keychain
-            security default-keychain -s build.keychain
-            security unlock-keychain -p "$KEYCHAIN_PWD" build.keychain
-            security import certificate.p12 -k build.keychain -P "${{ secrets.MACOS_CERTIFICATE_PWD }}" -T /usr/bin/codesign
-            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PWD" build.keychain
-            
-            # Export the identity name if known, or let build-dmg.sh know it's ready
-            export CODESIGN_IDENTITY="Developer ID Application"
-          fi
-
-          cd ./packaging/macos
-          ./build-dmg.sh ${{ github.ref_name }}
-          
-          # Notarize the DMG
-          if [ ! -z "${{ secrets.APPLE_ID }}" ]; then
-            echo "Notarizing DMG..."
-            xcrun notarytool submit ../../release/MarkdownConverter.dmg \
-              --apple-id "${{ secrets.APPLE_ID }}" \
-              --password "${{ secrets.APPLE_ID_PASSWORD }}" \
-              --team-id "${{ secrets.APPLE_TEAM_ID }}" \
-              --wait
-            
-            echo "Stapling notarization ticket..."
-            xcrun stapler staple ../../release/MarkdownConverter.dmg
-          fi
-
-      - name: Upload macOS Output
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-installers
-          path: release/*.dmg
-
   release:
-    needs: [build-windows-exe-msi, build-linux-deb, build-macos-dmg]
+    needs: [build-windows-exe-msi, build-linux-deb]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -161,7 +101,6 @@ jobs:
           
           ### 📱 Multi-Platform Support
           - **Windows**: Improved installer stability with Inno Setup and MSI.
-          - **macOS**: Full Apple Disk Image (.dmg) support with automatic icon scaling.
           - **Linux**: Optimized Debian (.deb) package generation.
           
           ### 🛠 Changes in this version
@@ -174,12 +113,11 @@ jobs:
           $body | Set-Content release_notes.md
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           body_path: release_notes.md
           files: |
             artifacts/MarkdownConverter-Setup-x64.exe
             artifacts/MarkdownConverter.msi
             artifacts/*.deb
-            artifacts/*.dmg
           generate_release_notes: true

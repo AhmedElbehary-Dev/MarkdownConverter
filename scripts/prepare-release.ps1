@@ -51,7 +51,6 @@ $(
 
 ### 📱 Platform Support
 - **Windows**: Built-in .exe and .msi installers.
-- **macOS**: Official .dmg Disk Image support.
 - **Linux**: Debian (.deb) package for x64.
 
 ---
