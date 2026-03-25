@@ -169,8 +169,7 @@ public sealed class PdfExporter
 
     private static async Task ExportWithChromiumCliAsync(string html, string outputPath, CancellationToken cancellationToken)
     {
-        var fileName = $"mdc-{Guid.NewGuid():N}.html".TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        var tempHtmlPath = Path.Combine(Path.GetTempPath(), fileName);
+        var tempHtmlPath = Path.Join(Path.GetTempPath(), $"mdc-{Guid.NewGuid():N}.html");
         try
         {
             await File.WriteAllTextAsync(tempHtmlPath, html, cancellationToken).ConfigureAwait(false);
@@ -227,8 +226,7 @@ public sealed class PdfExporter
 
     private static async Task ExportWithWkhtmltopdfCliAsync(string html, string outputPath, CancellationToken cancellationToken)
     {
-        var fileName = $"mdc-{Guid.NewGuid():N}.html".TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        var tempHtmlPath = Path.Combine(Path.GetTempPath(), fileName);
+        var tempHtmlPath = Path.Join(Path.GetTempPath(), $"mdc-{Guid.NewGuid():N}.html");
         try
         {
             await File.WriteAllTextAsync(tempHtmlPath, html, cancellationToken).ConfigureAwait(false);
@@ -330,8 +328,7 @@ public sealed class PdfExporter
         {
             foreach (var extension in extensions)
             {
-                var subPath = (commandName + extension).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-                var candidate = Path.Combine(dir, subPath);
+                var candidate = Path.Join(dir, commandName + extension);
                 if (File.Exists(candidate))
                 {
                     return true;

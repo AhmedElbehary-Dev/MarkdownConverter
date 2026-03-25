@@ -220,9 +220,9 @@ internal static class Program
     private static Task BaselineScaffold_FoldersExist()
     {
         var root = FindRepoRoot();
-        Assert(Directory.Exists(Path.Combine(root, "tests", "Baselines")), "tests/Baselines should exist.");
-        Assert(Directory.Exists(Path.Combine(root, "tests", "Fixtures")), "tests/Fixtures should exist.");
-        Assert(File.Exists(Path.Combine(root, "tests", "Baselines", "README.md")), "Baseline README scaffold should exist.");
+        Assert(Directory.Exists(Path.Join(root, "tests", "Baselines")), "tests/Baselines should exist.");
+        Assert(Directory.Exists(Path.Join(root, "tests", "Fixtures")), "tests/Fixtures should exist.");
+        Assert(File.Exists(Path.Join(root, "tests", "Baselines", "README.md")), "Baseline README scaffold should exist.");
         return Task.CompletedTask;
     }
 
@@ -252,7 +252,7 @@ internal static class Program
         for (var i = 0; i < 12 && current is not null; i++)
         {
             var candidate = current.FullName;
-            if (File.Exists(Path.Combine(candidate, "MarkdownConverter.sln")))
+            if (File.Exists(Path.Join(candidate, "MarkdownConverter.sln")))
             {
                 return candidate;
             }
@@ -293,9 +293,7 @@ internal static class Program
             {
                 foreach (var ext in extensions)
                 {
-                    // Ensure command name does not start with a separator for Path.Combine safety
-                    var commandFixed = command.TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-                    if (File.Exists(Path.Combine(dir, commandFixed + ext)))
+                    if (File.Exists(Path.Join(dir, command + ext)))
                     {
                         return true;
                     }
@@ -374,10 +372,7 @@ internal static class Program
     {
         public TempDir()
         {
-            // Trim leading separators from sub-paths to satisfy code scanning Path.Combine rules
-            var subPath1 = "MarkdownConverter.Tests".TrimStart(System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar);
-            var subPath2 = Guid.NewGuid().ToString("N");
-            Path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), subPath1, subPath2);
+            Path = System.IO.Path.Join(System.IO.Path.GetTempPath(), "MarkdownConverter.Tests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(Path);
         }
 

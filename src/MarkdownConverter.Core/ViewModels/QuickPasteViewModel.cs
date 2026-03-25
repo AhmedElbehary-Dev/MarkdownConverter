@@ -262,9 +262,7 @@ namespace MarkdownConverter.ViewModels
             StatusKind = StatusKind.Info;
 
             var ext = Formats.FirstOrDefault(f => f.Value == SelectedFormat)?.Extension ?? "pdf";
-            // Ensure filename doesn't start with a separator to satisfy code scanning Path.Combine rules
-            var fileNameWithExt = $"{SelectedHistoryEntry.Title}.{ext}".TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            var outputPath = Path.Combine(outputFolder, fileNameWithExt);
+            var outputPath = Path.Join(outputFolder, $"{SelectedHistoryEntry.Title}.{ext}");
 
             try
             {
