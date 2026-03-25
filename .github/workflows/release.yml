@@ -112,6 +112,9 @@ jobs:
           $body = @"
           This release of **Markdown Converter Pro** includes several updates across all platforms.
           
+          ### ✨ Features & Improvements
+          - **PDF Editor Module**: Introduced a new module for deleting pages and basic PDF editing functionality.
+
           ### 📱 Multi-Platform Support
           - **Windows**: Improved installer stability with Inno Setup and MSI.
           - **Linux**: Optimized Debian (.deb) package generation.
