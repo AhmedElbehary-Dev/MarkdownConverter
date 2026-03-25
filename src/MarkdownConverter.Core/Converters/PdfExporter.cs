@@ -144,12 +144,9 @@ public sealed class PdfExporter
     {
         if (ex is AggregateException aggregate)
         {
-            foreach (var inner in aggregate.Flatten().InnerExceptions)
+            if (aggregate.Flatten().InnerExceptions.Any(IsDinkToPdfLoadOrRuntimeIssue))
             {
-                if (IsDinkToPdfLoadOrRuntimeIssue(inner))
-                {
-                    return true;
-                }
+                return true;
             }
         }
 
@@ -324,15 +321,8 @@ public sealed class PdfExporter
                 .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             : [string.Empty];
 
-        foreach (var dir in path.Split(pathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-        {
-            if (extensions.Select(ext => Path.Join(dir, commandName + ext)).Any(File.Exists))
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return path.Split(pathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Any(dir => extensions.Any(ext => File.Exists(Path.Join(dir, commandName + ext))));
     }
 
     private static void TryDeleteFile(string path)

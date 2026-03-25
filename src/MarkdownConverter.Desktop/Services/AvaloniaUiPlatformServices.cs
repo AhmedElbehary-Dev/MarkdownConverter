@@ -92,7 +92,7 @@ public sealed class AvaloniaUiPlatformServices : IUiPlatformServices
             {
                 suggested = await owner.StorageProvider.TryGetFolderFromPathAsync(initialPath);
             }
-            catch
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 suggested = null;
             }

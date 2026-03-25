@@ -47,7 +47,7 @@ public sealed class RuntimePdfNativeLibraryLoader : IPdfNativeLibraryLoader
 
             throw new DllNotFoundException(
                 $"Unable to load '{BaseLibraryName}'. Expected runtime asset '{libraryFileName}' under " +
-                $"'{Path.Combine(AppContext.BaseDirectory, "runtimes", "<rid>", "native")}' or a system-installed library.");
+                $"'{Path.Join(AppContext.BaseDirectory, "runtimes", "<rid>", "native")}' or a system-installed library.");
         }
     }
 

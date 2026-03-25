@@ -17,8 +17,8 @@ namespace MarkdownConverter.Services
         public QuickPasteStorageService()
         {
             var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            _storageDir = Path.Combine(localAppData, "MarkdownConverterPro", "QuickPaste");
-            _indexPath = Path.Combine(_storageDir, "index.json");
+            _storageDir = Path.Join(localAppData, "MarkdownConverterPro", "QuickPaste");
+            _indexPath = Path.Join(_storageDir, "index.json");
             _cache = new List<QuickPasteEntry>();
         }
 
@@ -41,7 +41,7 @@ namespace MarkdownConverter.Services
                 _cache = JsonSerializer.Deserialize<List<QuickPasteEntry>>(json) ?? new List<QuickPasteEntry>();
                 return _cache;
             }
-            catch
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return new List<QuickPasteEntry>();
             }

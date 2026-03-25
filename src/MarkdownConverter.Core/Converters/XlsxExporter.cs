@@ -197,7 +197,7 @@ public sealed class XlsxExporter
                 builder.Append(ExtractInlineText(heading.Inline));
                 break;
             case FencedCodeBlock fencedCode:
-                builder.Append(fencedCode.Lines.ToString());
+                builder.Append(fencedCode.Lines);
                 break;
             case ContainerBlock container:
                 foreach (var child in container.Select(ExtractBlockText).Where(text => !string.IsNullOrWhiteSpace(text)))

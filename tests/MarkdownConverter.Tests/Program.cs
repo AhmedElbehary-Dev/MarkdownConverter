@@ -88,12 +88,12 @@ internal static class Program
         vm.SetSelectedMarkdownPath("/tmp/input/sample.md");
         vm.OutputFolder = "/tmp/output";
 
-        Assert(vm.OutputFilePath.EndsWith(Path.Combine("output", "sample.pdf"), StringComparison.Ordinal),
+        Assert(vm.OutputFilePath.EndsWith(Path.Join("output", "sample.pdf"), StringComparison.Ordinal),
             "Default output format should be PDF.");
 
         vm.SelectedFormat = vm.Formats.First(f => f.Extension == "xlsx").Value;
 
-        Assert(vm.OutputFilePath.EndsWith(Path.Combine("output", "sample.xlsx"), StringComparison.Ordinal),
+        Assert(vm.OutputFilePath.EndsWith(Path.Join("output", "sample.xlsx"), StringComparison.Ordinal),
             "Output path should update with selected format.");
 
         return Task.CompletedTask;
@@ -135,8 +135,8 @@ internal static class Program
     private static Task ConvertCommand_OverwriteProtectionBlocksConversion()
     {
         using var tempDir = new TempDir();
-        var inputPath = Path.Combine(tempDir.Path, "input.md");
-        var outputPath = Path.Combine(tempDir.Path, "input.xlsx");
+        var inputPath = Path.Join(tempDir.Path, "input.md");
+        var outputPath = Path.Join(tempDir.Path, "input.xlsx");
         File.WriteAllText(inputPath, "# Title");
         File.WriteAllText(outputPath, "existing");
 
@@ -158,7 +158,7 @@ internal static class Program
     private static async Task ConvertCommand_XlsxConversion_SucceedsAndWritesFile()
     {
         using var tempDir = new TempDir();
-        var inputPath = Path.Combine(tempDir.Path, "input.md");
+        var inputPath = Path.Join(tempDir.Path, "input.md");
         File.WriteAllText(inputPath, "# Title\n\n| A | B |\n|---|---|\n| 1 | 2 |\n");
 
         var vm = CreateViewModel(out _);
@@ -180,7 +180,7 @@ internal static class Program
     private static async Task ConvertCommand_PdfConversion_ProducesFileOrDependencyError()
     {
         using var tempDir = new TempDir();
-        var inputPath = Path.Combine(tempDir.Path, "input.md");
+        var inputPath = Path.Join(tempDir.Path, "input.md");
         File.WriteAllText(inputPath, "# Title\n\nHello PDF.\n");
 
         var vm = CreateViewModel(out var ui);
