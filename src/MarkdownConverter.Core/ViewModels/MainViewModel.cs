@@ -434,7 +434,8 @@ namespace MarkdownConverter.ViewModels
 
             var fileName = Path.GetFileNameWithoutExtension(SelectedMarkdownPath);
             var extension = GetSelectedExtension();
-            OutputFilePath = Path.Combine(baseFolder, $"{fileName}.{extension}");
+            var fileNameWithExt = $"{fileName}.{extension}".TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            OutputFilePath = Path.Combine(baseFolder, fileNameWithExt);
         }
 
         private void SetOutputFolder(string value, bool markAsManual)
