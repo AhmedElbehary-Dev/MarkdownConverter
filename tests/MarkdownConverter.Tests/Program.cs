@@ -150,7 +150,7 @@ internal static class Program
 
         Assert(vm.StatusText == "Output file already exists.", "Overwrite protection message should match.");
         Assert(vm.StatusKind == StatusKind.Error, "StatusKind should be Error.");
-        Assert(vm.IsBusy == false, "ViewModel should not remain busy.");
+        Assert(!vm.IsBusy, "ViewModel should not remain busy.");
 
         return Task.CompletedTask;
     }
@@ -375,10 +375,8 @@ internal static class Program
                     Directory.Delete(Path, recursive: true);
                 }
             }
-            catch
-            {
-                // Ignore cleanup failures in test harness.
-            }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
         }
     }
 }

@@ -5,6 +5,8 @@ using System.Runtime.InteropServices;
 
 namespace MarkdownConverter.Desktop.Platform;
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "cs/unmanaged-code", Justification = "X11 window class hinting is required for proper Linux desktop integration and cannot be achieved via managed code.")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "cs/call-to-unmanaged-code", Justification = "Native display operations are required for X11 compatibility.")]
 internal static class LinuxDesktopIntegration
 {
     internal const string LinuxAppId = "markdown-converter-pro";
@@ -118,6 +120,8 @@ internal static class LinuxDesktopIntegration
     [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     private static extern int XSetClassHint(IntPtr display, IntPtr window, IntPtr class_hints);
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "cs/unmanaged-code", Justification = "X11 window class hinting is required for proper Linux desktop integration and cannot be achieved via managed code.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "cs/call-to-unmanaged-code", Justification = "Native display operations are required for X11 compatibility.")]
     [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     private static extern int XFree(IntPtr data);
 }

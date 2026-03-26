@@ -142,12 +142,9 @@ public sealed class PdfExporter
 
     private static bool IsDinkToPdfLoadOrRuntimeIssue(Exception ex)
     {
-        if (ex is AggregateException aggregate)
+        if (ex is AggregateException aggregate && aggregate.Flatten().InnerExceptions.Any(IsDinkToPdfLoadOrRuntimeIssue))
         {
-            if (aggregate.Flatten().InnerExceptions.Any(IsDinkToPdfLoadOrRuntimeIssue))
-            {
-                return true;
-            }
+            return true;
         }
 
         if (ex is DllNotFoundException dllEx)
