@@ -375,8 +375,8 @@ internal static class Program
                     Directory.Delete(Path, recursive: true);
                 }
             }
-            catch (IOException) { /* Cleanup is best-effort only in test harness */ }
-            catch (UnauthorizedAccessException) { /* Cleanup is best-effort only in test harness */ }
+            catch (IOException ex) { Console.WriteLine($"Note: Cleanup failed (IOException): {ex.Message}"); }
+            catch (UnauthorizedAccessException ex) { Console.WriteLine($"Note: Cleanup failed (UnauthorizedAccess): {ex.Message}"); }
         }
     }
 }

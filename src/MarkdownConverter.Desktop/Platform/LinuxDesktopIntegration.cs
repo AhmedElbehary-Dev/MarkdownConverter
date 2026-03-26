@@ -51,8 +51,8 @@ internal static class LinuxDesktopIntegration
             return;
         }
 
-        var display = XOpenDisplay(null);
-        if (display == IntPtr.Zero)
+        using var display = XOpenDisplay(null);
+        if (display.IsInvalid)
         {
             return;
         }
@@ -82,22 +82,9 @@ internal static class LinuxDesktopIntegration
         }
         finally
         {
-            if (resName != IntPtr.Zero)
-            {
-                Marshal.FreeHGlobal(resName);
-            }
-
-            if (resClass != IntPtr.Zero)
-            {
-                Marshal.FreeHGlobal(resClass);
-            }
-
-            if (hint != IntPtr.Zero)
-            {
-                _ = XFree(hint);
-            }
-
-            _ = XCloseDisplay(display);
+            if (resName != IntPtr.Zero) Marshal.FreeHGlobal(resName);
+            if (resClass != IntPtr.Zero) Marshal.FreeHGlobal(resClass);
+            if (hint != IntPtr.Zero) XFree(hint);
         }
     }
 
@@ -108,20 +95,25 @@ internal static class LinuxDesktopIntegration
         public IntPtr res_class;
     }
 
-    [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    private static extern IntPtr XOpenDisplay(string? display_name);
+    private sealed class XDisplayHandle : SafeHandle
+    {
+        public XDisplayHandle() : base(IntPtr.Zero, true) { }
+        public override bool IsInvalid => handle == IntPtr.Zero;
+        protected override bool ReleaseHandle() => XCloseDisplay(handle) == 0;
+
+        [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        private static extern int XCloseDisplay(IntPtr display);
+    }
 
     [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    private static extern int XCloseDisplay(IntPtr display);
+    private static extern XDisplayHandle XOpenDisplay(string? display_name);
 
     [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     private static extern IntPtr XAllocClassHint();
 
     [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    private static extern int XSetClassHint(IntPtr display, IntPtr window, IntPtr class_hints);
+    private static extern int XSetClassHint(XDisplayHandle display, IntPtr window, IntPtr class_hints);
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "cs/unmanaged-code", Justification = "X11 window class hinting is required for proper Linux desktop integration and cannot be achieved via managed code.")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "cs/call-to-unmanaged-code", Justification = "Native display operations are required for X11 compatibility.")]
     [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     private static extern int XFree(IntPtr data);
 }
