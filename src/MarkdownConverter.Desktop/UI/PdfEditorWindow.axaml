@@ -65,6 +65,7 @@
     </Style>
   </Window.Styles>
 
+  <Panel>
   <Grid RowDefinitions="Auto,*,Auto" Margin="18">
     <!-- Header -->
     <Border Grid.Row="0" Classes="card" Padding="16">
@@ -101,8 +102,8 @@
                 <Border BorderBrush="{DynamicResource StrokeBrush}" BorderThickness="1" CornerRadius="8" Margin="8" Padding="8" Background="{DynamicResource PanelAltBrush}" Width="200">
                   <StackPanel Spacing="8">
                     <TextBlock Text="{Binding PageNumber, StringFormat='Page {0}'}" HorizontalAlignment="Center" FontWeight="SemiBold" />
-                    <Image Source="{Binding UiThumbnail}" Height="250" Stretch="Uniform" />
-                    <CheckBox Content="Delete this page" IsChecked="{Binding IsSelected}" HorizontalAlignment="Center" />
+                    <Image Source="{Binding UiThumbnail}" Height="250" Stretch="Uniform" DoubleTapped="Image_DoubleTapped" Cursor="Hand" ToolTip.Tip="Double click to enlarge" />
+                    <CheckBox Content="Select this page" IsChecked="{Binding IsSelected}" HorizontalAlignment="Center" />
                   </StackPanel>
                 </Border>
               </DataTemplate>
@@ -114,14 +115,61 @@
 
     <!-- Footer -->
     <Border Grid.Row="2" Classes="subtle" Padding="16">
-      <Grid ColumnDefinitions="*,Auto,Auto">
-        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="4">
           <TextBlock Text="{Binding StatusText}" Foreground="{DynamicResource TextSecondaryBrush}" />
           <TextBlock Text="{Binding ExportSuccessMessage}" Foreground="{DynamicResource AccentBrush}" TextWrapping="Wrap" />
         </StackPanel>
         
-        <Button Grid.Column="2" Content="Delete Selected Pages &amp; Export" Classes="primary" Command="{Binding DeleteSelectedPagesCommand}" Margin="8,0,0,0" IsEnabled="{Binding !IsExporting}" />
+        <StackPanel Grid.Column="1" Spacing="12">
+          <!-- Selection Actions -->
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+            <Button Content="Delete Selected" Command="{Binding DeleteSelectedPagesCommand}" IsEnabled="{Binding !IsExporting}" />
+            <Button Content="Extract Selected" Command="{Binding ExtractSelectedPagesCommand}" IsEnabled="{Binding !IsExporting}" />
+            <Button Content="Duplicate Selected" Command="{Binding DuplicateSelectedCommand}" IsEnabled="{Binding !IsExporting}" />
+          </StackPanel>
+          
+          <!-- Document Actions -->
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+            <Button Content="Reverse All Pages" Command="{Binding ReverseOrderCommand}" IsEnabled="{Binding !IsExporting}" />
+            
+            <TextBlock Text="Insert Blank at:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" Margin="8,0,0,0"/>
+            <TextBox Width="40" Text="{Binding InsertBlankPageIndex}" IsEnabled="{Binding !IsExporting}" />
+            <Button Content="Insert" Command="{Binding InsertBlankPageCommand}" IsEnabled="{Binding !IsExporting}" />
+          </StackPanel>
+          
+          <!-- Replace Action -->
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+            <TextBlock Text="Replace Page:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" />
+            <TextBox Width="40" Text="{Binding ReplaceTargetPage}" IsEnabled="{Binding !IsExporting}" />
+            <TextBlock Text="with:" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" />
+            <TextBox Width="40" Text="{Binding ReplaceSourcePage}" IsEnabled="{Binding !IsExporting}" />
+            <Button Content="Replace" Classes="primary" Command="{Binding ReplacePageCommand}" IsEnabled="{Binding !IsExporting}" />
+          </StackPanel>
+        </StackPanel>
       </Grid>
     </Border>
   </Grid>
+
+    <!-- Overlay Preview Grid -->
+    <Grid x:Name="OverlayGrid" Background="#99000000" IsVisible="False" ZIndex="100">
+      <!-- Click anywhere in the dark area to close -->
+      <Border Background="Transparent" PointerPressed="Overlay_PointerPressed" />
+      
+      <Border Margin="40" Background="{DynamicResource PanelBrush}" CornerRadius="12" BorderBrush="{DynamicResource StrokeBrush}" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" ClipToBounds="True">
+        <Grid RowDefinitions="Auto,*">
+          <Grid Grid.Row="0" Margin="16">
+             <TextBlock Text="Page Preview" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+             <Button Content="Close" Classes="primary" HorizontalAlignment="Right" Click="OverlayClose_Click" Padding="12,6" />
+          </Grid>
+          
+          <Border Grid.Row="1" Background="{DynamicResource AppBgBrush}">
+             <ScrollViewer>
+                 <Image x:Name="LargeImagePreview" Stretch="Uniform" Margin="16" />
+             </ScrollViewer>
+          </Border>
+        </Grid>
+      </Border>
+    </Grid>
+  </Panel>
 </Window>

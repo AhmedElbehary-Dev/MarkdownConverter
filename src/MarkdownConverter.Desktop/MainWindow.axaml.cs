@@ -174,4 +174,10 @@ public partial class MainWindow : Window
         var window = new MarkdownConverter.Desktop.UI.PdfEditorWindow();
         window.Show(this);
     }
+
+    private void About_Click(object? sender, RoutedEventArgs e)
+    {
+        var window = new MarkdownConverter.Desktop.UI.AboutWindow();
+        window.ShowDialog(this);
+    }
     }

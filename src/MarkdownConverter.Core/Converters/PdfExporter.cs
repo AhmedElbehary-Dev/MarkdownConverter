@@ -117,6 +117,7 @@ public sealed class PdfExporter
             {
                 new ObjectSettings
                 {
+                    PagesCount = true,
                     HtmlContent = html,
                     WebSettings = new WebSettings
                     {
@@ -132,6 +133,23 @@ public sealed class PdfExporter
                     {
                         StopSlowScript = true,
                         BlockLocalFileAccess = false
+                    },
+                    HeaderSettings = new HeaderSettings
+                    {
+                        Left = "Markdown Converter Pro",
+                        Right = DateTime.Now.ToString("MMMM dd, yyyy  ·  h:mm tt"),
+                        FontName = "Segoe UI",
+                        FontSize = 8,
+                        Line = true,
+                        Spacing = 5
+                    },
+                    FooterSettings = new FooterSettings
+                    {
+                        Center = "Page [page] of [toPage]",
+                        FontName = "Segoe UI",
+                        FontSize = 8,
+                        Line = true,
+                        Spacing = 5
                     }
                 }
             }
@@ -267,6 +285,26 @@ public sealed class PdfExporter
         psi.ArgumentList.Add("16");
         psi.ArgumentList.Add("--margin-right");
         psi.ArgumentList.Add("16");
+        psi.ArgumentList.Add("--header-left");
+        psi.ArgumentList.Add("Markdown Converter Pro");
+        psi.ArgumentList.Add("--header-right");
+        psi.ArgumentList.Add("[date]");
+        psi.ArgumentList.Add("--header-font-name");
+        psi.ArgumentList.Add("Segoe UI");
+        psi.ArgumentList.Add("--header-font-size");
+        psi.ArgumentList.Add("8");
+        psi.ArgumentList.Add("--header-line");
+        psi.ArgumentList.Add("--header-spacing");
+        psi.ArgumentList.Add("5");
+        psi.ArgumentList.Add("--footer-center");
+        psi.ArgumentList.Add("Page [page] of [toPage]");
+        psi.ArgumentList.Add("--footer-font-name");
+        psi.ArgumentList.Add("Segoe UI");
+        psi.ArgumentList.Add("--footer-font-size");
+        psi.ArgumentList.Add("8");
+        psi.ArgumentList.Add("--footer-line");
+        psi.ArgumentList.Add("--footer-spacing");
+        psi.ArgumentList.Add("5");
         psi.ArgumentList.Add(inputHtmlPath);
         psi.ArgumentList.Add(outputPath);
 

@@ -84,5 +84,153 @@ namespace MarkdownConverter.Services
 
             return outputFilePath;
         }
+
+        public string ExtractPagesAndExport(string inputFilePath, IEnumerable<int> selectedPages1Based)
+        {
+            var selectSet = new HashSet<int>(selectedPages1Based);
+            if (selectSet.Count == 0) throw new ArgumentException("No pages selected for extraction.");
+
+            var directory = Path.GetDirectoryName(inputFilePath) ?? string.Empty;
+            var fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputFilePath);
+            var ext = Path.GetExtension(inputFilePath);
+
+            var pagesStr = string.Join("_", selectSet.OrderBy(p => p));
+            if (pagesStr.Length > 50) pagesStr = pagesStr.Substring(0, 50) + "_etc";
+
+            var outputFilePath = Path.Join(directory, $"{fileNameWithoutExt}_extracted_{pagesStr}{ext}");
+
+            using (var inputDocument = PdfReader.Open(inputFilePath, PdfDocumentOpenMode.Import))
+            using (var outputDocument = new PdfDocument())
+            {
+                for (int i = 0; i < inputDocument.PageCount; i++)
+                {
+                    if (selectSet.Contains(i + 1))
+                    {
+                        outputDocument.AddPage(inputDocument.Pages[i]);
+                    }
+                }
+                outputDocument.Save(outputFilePath);
+            }
+
+            return outputFilePath;
+        }
+
+        public string ReverseOrderAndExport(string inputFilePath)
+        {
+            var directory = Path.GetDirectoryName(inputFilePath) ?? string.Empty;
+            var fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputFilePath);
+            var ext = Path.GetExtension(inputFilePath);
+            var outputFilePath = Path.Join(directory, $"{fileNameWithoutExt}_reversed{ext}");
+
+            using (var inputDocument = PdfReader.Open(inputFilePath, PdfDocumentOpenMode.Import))
+            using (var outputDocument = new PdfDocument())
+            {
+                for (int i = inputDocument.PageCount - 1; i >= 0; i--)
+                {
+                    outputDocument.AddPage(inputDocument.Pages[i]);
+                }
+                outputDocument.Save(outputFilePath);
+            }
+
+            return outputFilePath;
+        }
+
+        public string ReplacePageAndExport(string inputFilePath, int targetPage1Based, int replacementPage1Based)
+        {
+            var directory = Path.GetDirectoryName(inputFilePath) ?? string.Empty;
+            var fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputFilePath);
+            var ext = Path.GetExtension(inputFilePath);
+            var outputFilePath = Path.Join(directory, $"{fileNameWithoutExt}_replaced_p{targetPage1Based}_with_p{replacementPage1Based}{ext}");
+
+            using (var inputDocument = PdfReader.Open(inputFilePath, PdfDocumentOpenMode.Import))
+            using (var outputDocument = new PdfDocument())
+            {
+                if (targetPage1Based < 1 || targetPage1Based > inputDocument.PageCount) throw new ArgumentException("Invalid target page.");
+                if (replacementPage1Based < 1 || replacementPage1Based > inputDocument.PageCount) throw new ArgumentException("Invalid replacement page.");
+                if (targetPage1Based == replacementPage1Based) throw new ArgumentException("Target and replacement pages must be different.");
+
+                for (int i = 0; i < inputDocument.PageCount; i++)
+                {
+                    int currentPage1Based = i + 1;
+                    if (currentPage1Based == targetPage1Based)
+                    {
+                        outputDocument.AddPage(inputDocument.Pages[replacementPage1Based - 1]);
+                    }
+                    else
+                    {
+                        outputDocument.AddPage(inputDocument.Pages[i]);
+                    }
+                }
+                outputDocument.Save(outputFilePath);
+            }
+
+            return outputFilePath;
+        }
+
+        public string DuplicatePagesAndExport(string inputFilePath, IEnumerable<int> selectedPages1Based)
+        {
+            var duplicateSet = new HashSet<int>(selectedPages1Based);
+            if (duplicateSet.Count == 0) throw new ArgumentException("No pages selected for duplication.");
+
+            var directory = Path.GetDirectoryName(inputFilePath) ?? string.Empty;
+            var fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputFilePath);
+            var ext = Path.GetExtension(inputFilePath);
+
+            var pagesStr = string.Join("_", duplicateSet.OrderBy(p => p));
+            if (pagesStr.Length > 50) pagesStr = pagesStr.Substring(0, 50) + "_etc";
+
+            var outputFilePath = Path.Join(directory, $"{fileNameWithoutExt}_duplicated_{pagesStr}{ext}");
+
+            using (var inputDocument = PdfReader.Open(inputFilePath, PdfDocumentOpenMode.Import))
+            using (var outputDocument = new PdfDocument())
+            {
+                for (int i = 0; i < inputDocument.PageCount; i++)
+                {
+                    int pageNumber1Based = i + 1;
+                    outputDocument.AddPage(inputDocument.Pages[i]);
+                    if (duplicateSet.Contains(pageNumber1Based))
+                    {
+                        outputDocument.AddPage(inputDocument.Pages[i]);
+                    }
+                }
+                outputDocument.Save(outputFilePath);
+            }
+
+            return outputFilePath;
+        }
+
+        public string InsertBlankPageAndExport(string inputFilePath, int insertAtIndex1Based)
+        {
+            var directory = Path.GetDirectoryName(inputFilePath) ?? string.Empty;
+            var fileNameWithoutExt = Path.GetFileNameWithoutExtension(inputFilePath);
+            var ext = Path.GetExtension(inputFilePath);
+            var outputFilePath = Path.Join(directory, $"{fileNameWithoutExt}_blank_at_p{insertAtIndex1Based}{ext}");
+
+            using (var inputDocument = PdfReader.Open(inputFilePath, PdfDocumentOpenMode.Import))
+            using (var outputDocument = new PdfDocument())
+            {
+                if (insertAtIndex1Based < 1 || insertAtIndex1Based > inputDocument.PageCount + 1) 
+                    throw new ArgumentException("Invalid insertion index.");
+
+                for (int i = 0; i < inputDocument.PageCount; i++)
+                {
+                    int currentPage1Based = i + 1;
+                    if (currentPage1Based == insertAtIndex1Based)
+                    {
+                        outputDocument.AddPage();
+                    }
+                    outputDocument.AddPage(inputDocument.Pages[i]);
+                }
+                
+                if (insertAtIndex1Based == inputDocument.PageCount + 1)
+                {
+                    outputDocument.AddPage();
+                }
+
+                outputDocument.Save(outputFilePath);
+            }
+
+            return outputFilePath;
+        }
     }
 }

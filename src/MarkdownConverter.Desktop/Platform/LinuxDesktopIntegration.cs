@@ -7,7 +7,7 @@ namespace MarkdownConverter.Desktop.Platform;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "cs/unmanaged-code", Justification = "X11 window class hinting is required for proper Linux desktop integration and cannot be achieved via managed code.")]
 [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "cs/call-to-unmanaged-code", Justification = "Native display operations are required for X11 compatibility.")]
-internal static class LinuxDesktopIntegration
+internal static partial class LinuxDesktopIntegration
 {
     internal const string LinuxAppId = "markdown-converter-pro";
 
@@ -51,6 +51,7 @@ internal static class LinuxDesktopIntegration
             return;
         }
 
+        // codeql[cs/call-to-unmanaged-code]
         using var display = XOpenDisplay(null);
         if (display.IsInvalid)
         {
@@ -78,12 +79,14 @@ internal static class LinuxDesktopIntegration
             };
 
             Marshal.StructureToPtr(classHint, hint, fDeleteOld: false);
+            // codeql[cs/call-to-unmanaged-code]
             _ = XSetClassHint(display, nativeHandle, hint);
         }
         finally
         {
             if (resName != IntPtr.Zero) Marshal.FreeHGlobal(resName);
             if (resClass != IntPtr.Zero) Marshal.FreeHGlobal(resClass);
+            // codeql[cs/call-to-unmanaged-code]
             if (hint != IntPtr.Zero) XFree(hint);
         }
     }
@@ -95,25 +98,31 @@ internal static class LinuxDesktopIntegration
         public IntPtr res_class;
     }
 
-    private sealed class XDisplayHandle : SafeHandle
+    private sealed partial class XDisplayHandle : SafeHandle
     {
         public XDisplayHandle() : base(IntPtr.Zero, true) { }
         public override bool IsInvalid => handle == IntPtr.Zero;
+        // codeql[cs/call-to-unmanaged-code]
         protected override bool ReleaseHandle() => XCloseDisplay(handle) == 0;
 
-        [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        private static extern int XCloseDisplay(IntPtr display);
+        // codeql[cs/unmanaged-code]
+        [LibraryImport("libX11", EntryPoint = "XCloseDisplay")]
+        private static partial int XCloseDisplay(IntPtr display);
     }
 
-    [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    private static extern XDisplayHandle XOpenDisplay(string? display_name);
+    // codeql[cs/unmanaged-code]
+    [LibraryImport("libX11", EntryPoint = "XOpenDisplay", StringMarshalling = StringMarshalling.Utf8)]
+    private static partial XDisplayHandle XOpenDisplay(string? display_name);
 
-    [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    private static extern IntPtr XAllocClassHint();
+    // codeql[cs/unmanaged-code]
+    [LibraryImport("libX11", EntryPoint = "XAllocClassHint")]
+    private static partial IntPtr XAllocClassHint();
 
-    [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    private static extern int XSetClassHint(XDisplayHandle display, IntPtr window, IntPtr class_hints);
+    // codeql[cs/unmanaged-code]
+    [LibraryImport("libX11", EntryPoint = "XSetClassHint")]
+    private static partial int XSetClassHint(XDisplayHandle display, IntPtr window, IntPtr class_hints);
 
-    [DllImport("libX11", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    private static extern int XFree(IntPtr data);
+    // codeql[cs/unmanaged-code]
+    [LibraryImport("libX11", EntryPoint = "XFree")]
+    private static partial int XFree(IntPtr data);
 }

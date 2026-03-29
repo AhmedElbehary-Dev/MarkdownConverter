@@ -1,0 +1,139 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        x:Class="MarkdownConverter.Desktop.UI.AboutWindow"
+        mc:Ignorable="d"
+        Width="480"
+        Height="520"
+        CanResize="False"
+        Title="About - Markdown Converter Pro"
+        Icon="avares://MarkdownConverter.Desktop/Assets/md_converter.ico"
+        Background="{DynamicResource AppBgBrush}"
+        WindowStartupLocation="CenterOwner">
+
+  <Window.Styles>
+    <Style Selector="TextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{DynamicResource PanelBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource StrokeBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="14" />
+    </Style>
+
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+      <Setter Property="Foreground" Value="#091318" />
+      <Setter Property="BorderBrush" Value="#34D2D9" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="24,10" />
+    </Style>
+
+    <Style Selector="Button.primary:pointerover">
+      <Setter Property="Background" Value="{DynamicResource AccentStrongBrush}" />
+      <Setter Property="BorderBrush" Value="#5EE4EA" />
+    </Style>
+    <Style Selector="Button.link">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <ContentPresenter Content="{TemplateBinding Content}" />
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="Button.link:pointerover TextBlock">
+      <Setter Property="TextDecorations" Value="Underline" />
+    </Style>
+  </Window.Styles>
+
+  <Grid Margin="24">
+    <!-- Subtle accent glow -->
+    <Border Margin="-60,-80,-60,100"
+            IsHitTestVisible="False"
+            Opacity="0.06"
+            Background="{DynamicResource AccentBrush}"
+            CornerRadius="240" />
+
+    <Border Classes="card" Padding="32">
+      <StackPanel Spacing="20" HorizontalAlignment="Center" VerticalAlignment="Center">
+
+        <!-- App Logo -->
+        <Border Width="96"
+                Height="96"
+                CornerRadius="20"
+                Background="White"
+                BorderBrush="{DynamicResource StrokeBrush}"
+                BorderThickness="1"
+                HorizontalAlignment="Center">
+          <Image Source="avares://MarkdownConverter.Desktop/Assets/md_converter.png"
+                 Stretch="Uniform"
+                 Margin="10" />
+        </Border>
+
+        <!-- App Name -->
+        <TextBlock Text="Markdown Converter Pro"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Center" />
+
+        <!-- Version -->
+        <TextBlock x:Name="VersionText"
+                   Text="v2.0.7"
+                   Foreground="{DynamicResource AccentBrush}"
+                   FontSize="14"
+                   FontWeight="SemiBold"
+                   HorizontalAlignment="Center"
+                   Margin="0,-12,0,0" />
+
+        <!-- Separator -->
+        <Border Height="1"
+                Background="{DynamicResource StrokeBrush}"
+                Margin="20,0" />
+
+        <!-- Description -->
+        <TextBlock TextWrapping="Wrap"
+                   TextAlignment="Center"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
+                   FontSize="13"
+                   LineHeight="20"
+                   Margin="12,0"
+                   Text="A powerful cross-platform tool for converting Markdown files to PDF, Word, and Excel formats. Features drag-and-drop input, quick paste editing, PDF annotation, and batch conversion." />
+
+        <!-- Separator -->
+        <Border Height="1"
+                Background="{DynamicResource StrokeBrush}"
+                Margin="20,0" />
+
+        <!-- Credit -->
+        <StackPanel Spacing="4" HorizontalAlignment="Center">
+          <TextBlock Text="Designed &amp; Implemented by"
+                     Foreground="{DynamicResource TextMutedBrush}"
+                     FontSize="12"
+                     HorizontalAlignment="Center" />
+          <Button Classes="link" 
+                  Click="GithubLink_Click"
+                  Cursor="Hand"
+                  HorizontalAlignment="Center">
+            <TextBlock Text="Ahmed Elbehary"
+                       FontSize="16"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource AccentStrongBrush}" />
+          </Button>
+        </StackPanel>
+
+        <!-- Close Button -->
+        <Button Content="Close"
+                Classes="primary"
+                HorizontalAlignment="Center"
+                Click="Close_Click" />
+
+      </StackPanel>
+    </Border>
+  </Grid>
+</Window>

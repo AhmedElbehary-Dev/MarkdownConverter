@@ -138,6 +138,10 @@
         </Border>
         
         <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8">
+          <Button Content="About" 
+                  Classes="flat" 
+                  VerticalAlignment="Center" 
+                  Click="About_Click" />
           <Button Content="PDF Editor" 
                   Classes="flat" 
                   VerticalAlignment="Center" 

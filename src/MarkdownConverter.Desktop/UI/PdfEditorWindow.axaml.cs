@@ -63,5 +63,32 @@ namespace MarkdownConverter.Desktop.UI
             }
             return writeableBitmap;
         }
+
+        private void Image_DoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
+        {
+            if (sender is Image img && img.DataContext is PdfPageViewModel vm)
+            {
+                var overlay = this.FindControl<Grid>("OverlayGrid");
+                var largeImage = this.FindControl<Image>("LargeImagePreview");
+                
+                if (overlay != null && largeImage != null)
+                {
+                    largeImage.Source = vm.UiThumbnail as Avalonia.Media.IImage;
+                    overlay.IsVisible = true;
+                }
+            }
+        }
+
+        private void Overlay_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+        {
+            var overlay = this.FindControl<Grid>("OverlayGrid");
+            if (overlay != null) overlay.IsVisible = false;
+        }
+
+        private void OverlayClose_Click(object? sender, RoutedEventArgs e)
+        {
+            var overlay = this.FindControl<Grid>("OverlayGrid");
+            if (overlay != null) overlay.IsVisible = false;
+        }
     }
 }
