@@ -170,6 +170,36 @@ public sealed class AvaloniaUiPlatformServices : IUiPlatformServices
         await dialog.ShowDialog(owner);
     }
 
+    public async Task<bool> ShowConfirmAsync(string title, string message)
+    {
+        var owner = _getOwner();
+        if (owner is null)
+        {
+            return false;
+        }
+
+        if (!Dispatcher.UIThread.CheckAccess())
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            Dispatcher.UIThread.Post(async () =>
+            {
+                try
+                {
+                    var result = await ShowConfirmAsync(title, message);
+                    tcs.TrySetResult(result);
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    tcs.TrySetException(ex);
+                }
+            });
+            return await tcs.Task;
+        }
+
+        var dialog = new MarkdownConverter.Desktop.UI.ConfirmDialogWindow(title, message);
+        return await dialog.ShowDialog(owner);
+    }
+
     public IUiTimer CreateTimer(TimeSpan interval, Action tick)
     {
         return new AvaloniaUiTimer(interval, tick);

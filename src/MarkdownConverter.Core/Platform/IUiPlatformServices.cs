@@ -13,6 +13,7 @@ public interface IUiPlatformServices
     void SetClipboardText(string text);
     Task<string?> GetClipboardTextAsync();
     Task ShowMessageAsync(string message, ToastKind kind);
+    Task<bool> ShowConfirmAsync(string title, string message);
     IUiTimer CreateTimer(TimeSpan interval, Action tick);
     void PostToUi(Action action);
 }

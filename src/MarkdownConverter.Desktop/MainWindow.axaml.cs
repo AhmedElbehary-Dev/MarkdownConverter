@@ -157,6 +157,11 @@ public partial class MainWindow : Window
 
         _linuxDesktopIdentityApplied = true;
         LinuxDesktopIntegration.TryApplyRuntimeIdentity(this);
+
+        // Run auto update check in background without blocking UI
+        var services = new MarkdownConverter.Desktop.Services.AvaloniaUiPlatformServices(() => this);
+        var updateService = new MarkdownConverter.Desktop.Services.AutoUpdaterService(services);
+        _ = System.Threading.Tasks.Task.Run(() => updateService.CheckForUpdatesBackgroundAsync());
     }
 
     private void QuickPaste_Click(object? sender, RoutedEventArgs e)
