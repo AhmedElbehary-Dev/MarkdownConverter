@@ -1,0 +1,9 @@
+name: "Markdown Converter Pro Custom CodeQL Configuration"
+
+# We exclude specific rules because this is a desktop application
+# that relies on unmanaged code (X11 for Linux, Win32 APIs, etc.)
+query-filters:
+  - exclude:
+      id: cs/unmanaged-code
+  - exclude:
+      id: cs/call-to-unmanaged-code
