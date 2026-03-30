@@ -6,7 +6,9 @@ using MarkdownConverter.Converters;
 using MarkdownConverter.Desktop.Services;
 using MarkdownConverter.Desktop.Platform;
 using MarkdownConverter.ViewModels;
+using Avalonia.Platform.Storage;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MarkdownConverter.Desktop;
@@ -33,11 +35,20 @@ public partial class MainWindow : Window
         DataContext = _viewModelFactory(() => this);
         ApplyDropZoneVisualState(isActive: false);
         Opened += MainWindow_Opened;
+
+        // Avalonia requires drag-drop to be registered in code for reliable cross-platform support
+        if (this.FindControl<Border>("DropZone") is { } dropZone)
+        {
+            DragDrop.SetAllowDrop(dropZone, true);
+            dropZone.AddHandler(DragDrop.DragOverEvent, DropZone_DragOver);
+            dropZone.AddHandler(DragDrop.DragLeaveEvent, DropZone_DragLeave);
+            dropZone.AddHandler(DragDrop.DropEvent, DropZone_Drop);
+        }
     }
 
     private MainViewModel? ViewModel => DataContext as MainViewModel;
 
-    private void DropZone_PointerReleased(object? sender, PointerReleasedEventArgs e)
+    private void DropZone_Tapped(object? sender, TappedEventArgs e)
     {
         if (ViewModel is not { IsBusy: false } viewModel)
         {
@@ -66,7 +77,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        e.DragEffects = GetDragDropEffects(viewModel, e);
+        e.DragEffects = GetDragDropEffects(e);
         viewModel.IsDropZoneActive = e.DragEffects == DragDropEffects.Copy;
         ApplyDropZoneVisualState(viewModel.IsDropZoneActive);
         e.Handled = true;
@@ -100,29 +111,73 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
-    private static DragDropEffects GetDragDropEffects(MainViewModel viewModel, DragEventArgs e)
+    private static DragDropEffects GetDragDropEffects(DragEventArgs e)
     {
-        if (!TryGetDroppedFile(e, out var filePath))
+        // During DragOver on Windows, file paths are NOT accessible — only format presence can be checked.
+        // We accept if ANY file format is present; validation of extension happens on actual Drop.
+        var formats = e.Data.GetDataFormats();
+        foreach (var fmt in formats)
         {
-            return DragDropEffects.None;
+            if (fmt == DataFormats.Files || fmt == "FileNames" || fmt == "FileName")
+            {
+                return DragDropEffects.Copy;
+            }
         }
-
-        return viewModel.IsValidMarkdownFile(filePath) ? DragDropEffects.Copy : DragDropEffects.None;
+        return DragDropEffects.None;
     }
 
     private static bool TryGetDroppedFile(DragEventArgs e, out string filePath)
     {
         filePath = string.Empty;
-        var files = e.Data.GetFiles();
-        var first = files?.FirstOrDefault();
-        var localPath = GetLocalPath(first);
-        if (string.IsNullOrWhiteSpace(localPath))
+
+        // 1. Try Avalonia 11 Storage Items (Recommended)
+        var storageItems = e.Data.GetFiles();
+        if (storageItems != null)
         {
-            return false;
+            foreach (var item in storageItems)
+            {
+                var path = GetLocalPath(item);
+                if (!string.IsNullOrWhiteSpace(path))
+                {
+                    filePath = path;
+                    return true;
+                }
+            }
         }
 
-        filePath = localPath;
-        return true;
+        // 2. Try Legacy File Paths list (Strings)
+        var legacyFiles = e.Data.Get(DataFormats.Files);
+        if (legacyFiles is IEnumerable<string> stringPaths)
+        {
+            var first = stringPaths.FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(first))
+            {
+                filePath = first;
+                return true;
+            }
+        }
+        else if (legacyFiles is IEnumerable<object> objectPaths)
+        {
+            var first = objectPaths.FirstOrDefault()?.ToString();
+            if (!string.IsNullOrWhiteSpace(first))
+            {
+                filePath = first;
+                return true;
+            }
+        }
+
+        // 3. Last ditch effort: Platform-specific keys
+        if (e.Data.Get("FileNames") is IEnumerable<string> fileNames)
+        {
+            var first = fileNames.FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(first))
+            {
+                filePath = first;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void ApplyDropZoneVisualState(bool isActive)
@@ -136,16 +191,24 @@ public partial class MainWindow : Window
         border.BorderBrush = isActive ? DropZoneActiveBorder : DropZoneIdleBorder;
     }
 
-    private static string? GetLocalPath(Avalonia.Platform.Storage.IStorageItem? item)
+    private static string? GetLocalPath(IStorageItem? item)
     {
-        if (item?.Path is null)
+        if (item == null) return null;
+
+        // TryGetLocalPath is the most reliable way in Avalonia 11 to get a filesystem path
+        var localPath = item.TryGetLocalPath();
+        if (!string.IsNullOrWhiteSpace(localPath))
         {
-            return null;
+            return localPath;
         }
 
-        return item.Path.IsFile
-            ? item.Path.LocalPath
-            : item.Path.LocalPath;
+        // Fallback to Uri parsing if extension method returns null
+        if (item.Path is { IsFile: true } uri)
+        {
+            return uri.LocalPath;
+        }
+
+        return null;
     }
 
     private void MainWindow_Opened(object? sender, EventArgs e)

@@ -160,7 +160,7 @@
                 Classes="card"
                 Padding="18"
                 IsEnabled="{Binding IsBusy, Converter={StaticResource BoolNot}}"
-                PointerReleased="DropZone_PointerReleased"
+                Tapped="DropZone_Tapped"
                 DragDrop.AllowDrop="True"
                 DragDrop.DragOver="DropZone_DragOver"
                 DragDrop.DragLeave="DropZone_DragLeave"
