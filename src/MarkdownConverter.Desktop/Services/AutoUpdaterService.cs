@@ -82,7 +82,7 @@ public class AutoUpdaterService
                 return;
 
             // Silently download the update in the background
-            var tempPath = Path.Combine(Path.GetTempPath(), fileName);
+            var tempPath = Path.Join(Path.GetTempPath(), fileName);
             
             var downloadResponse = await client.GetAsync(downloadUrl);
             if (!downloadResponse.IsSuccessStatusCode)
@@ -110,7 +110,7 @@ public class AutoUpdaterService
                 Environment.Exit(0);
             }
         }
-        catch (Exception)
+        catch (Exception ex) when (ex is HttpRequestException or JsonException or IOException or UnauthorizedAccessException)
         {
             // Fail silently since it's a background update task
         }
