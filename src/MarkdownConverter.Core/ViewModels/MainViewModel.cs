@@ -21,6 +21,7 @@ namespace MarkdownConverter.ViewModels
 
     public enum ToastKind
     {
+        Neutral,
         Success,
         Error
     }

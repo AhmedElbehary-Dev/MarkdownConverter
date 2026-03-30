@@ -324,6 +324,12 @@ internal static class Program
             return Task.CompletedTask;
         }
 
+        public Task<bool> ShowConfirmAsync(string title, string message)
+        {
+            Dialogs.Add((title + ": " + message, ToastKind.Neutral));
+            return Task.FromResult(true);
+        }
+
         public IUiTimer CreateTimer(TimeSpan interval, Action tick)
         {
             var timer = new FakeTimer(interval, tick);
