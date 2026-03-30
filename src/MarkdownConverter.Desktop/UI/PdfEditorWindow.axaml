@@ -75,7 +75,7 @@
         </Border>
 
         <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center" Margin="16,0,16,0">
-          <TextBlock Text="PDF Editor Module" FontSize="20" FontWeight="SemiBold" />
+          <TextBlock Text="PDF Editor" FontSize="20" FontWeight="SemiBold" />
           <TextBlock Text="Remove pages from a PDF document" Foreground="{DynamicResource TextMutedBrush}" FontSize="12" />
         </StackPanel>
 

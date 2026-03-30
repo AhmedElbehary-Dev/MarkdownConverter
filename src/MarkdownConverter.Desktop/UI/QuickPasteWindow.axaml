@@ -103,7 +103,7 @@
         </Border>
 
         <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center" Margin="16,0,16,0">
-          <TextBlock Text="Quick Paste Module" FontSize="20" FontWeight="SemiBold" />
+          <TextBlock Text="Quick Paste" FontSize="20" FontWeight="SemiBold" />
           <TextBlock Text="Paste your markdown directly to save or export without files" Foreground="{DynamicResource TextMutedBrush}" FontSize="12" />
         </StackPanel>
 

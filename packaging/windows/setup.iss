@@ -1,7 +1,7 @@
 [Setup]
 AppId={{783eb077-d4fa-4dc4-bbf8-661cd9dc6ee8}
 AppName=MarkdownConverter
-AppVersion=2.0.2
+AppVersion=2.0.7
 DefaultDirName={autopf}\MarkdownConverter
 DefaultGroupName=MarkdownConverter
 UninstallDisplayIcon={app}\MarkdownConverter.exe

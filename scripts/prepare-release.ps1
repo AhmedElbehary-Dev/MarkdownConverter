@@ -59,4 +59,32 @@ $(
 
 $mdContent | Set-Content RELEASE_NOTES_TMP.md
 Write-Host "✅ Generated RELEASE_NOTES_TMP.md for version $Version" -ForegroundColor Green
-Write-Host "Please review the file. Once ready, run your tagging commands."
+
+Write-Host "🔄 Updating version numbers across project files to $verClean..." -ForegroundColor Cyan
+
+# Update all .csproj
+Get-ChildItem -Path ".\src", ".\" -Filter *.csproj -Recurse | ForEach-Object {
+    $content = Get-Content $_.FullName
+    if ($content -match '<Version>.*?</Version>') {
+        $newContent = $content -replace '<Version>.*?</Version>', "<Version>$verClean</Version>"
+        $newContent | Set-Content $_.FullName
+    }
+}
+
+# Update Windows Installer (.iss)
+$issPath = ".\packaging\windows\setup.iss"
+if (Test-Path $issPath) {
+    $content = Get-Content $issPath
+    $newContent = $content -replace 'AppVersion=.*', "AppVersion=$verClean"
+    $newContent | Set-Content $issPath
+}
+
+# Update WiX Installer (.wxs)
+$wxsPath = ".\packaging\windows\setup.wxs"
+if (Test-Path $wxsPath) {
+    $content = Get-Content $wxsPath
+    $newContent = $content -replace 'Version="[^"]*"', "Version=""$verClean"""
+    $newContent | Set-Content $wxsPath
+}
+
+Write-Host "Please review the file and changes. Once ready, run your tagging commands."

@@ -47,7 +47,10 @@
 ![Main Window](img/screen_1.png)
 
 ### Quick Paste
-![Quick Paste](img/screen-2.png)
+![Quick Paste](img/screen_2.png)
+
+### PDF Editor
+![PDF Editor](img/screen_3.png)
 
 ## Quick Start
 
