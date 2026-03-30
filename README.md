@@ -52,6 +52,9 @@
 ### PDF Editor
 ![PDF Editor](img/screen_3.png)
 
+### Auto Updater
+![Auto Updater](img/screen_4.png)
+
 ## Quick Start
 
 **Requirements:** .NET 10 SDK · Windows / Linux / macOS (x64)
