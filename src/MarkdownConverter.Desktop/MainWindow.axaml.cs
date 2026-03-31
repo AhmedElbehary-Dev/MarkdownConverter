@@ -36,13 +36,11 @@ public partial class MainWindow : Window
         ApplyDropZoneVisualState(isActive: false);
         Opened += MainWindow_Opened;
 
-        // Avalonia requires drag-drop to be registered in code for reliable cross-platform support
+        // Drag-drop handlers are declared in XAML (DragDrop.DragOver, DragDrop.Drop etc.)
+        // We only need to ensure AllowDrop is set programmatically as a safety net.
         if (this.FindControl<Border>("DropZone") is { } dropZone)
         {
             DragDrop.SetAllowDrop(dropZone, true);
-            dropZone.AddHandler(DragDrop.DragOverEvent, DropZone_DragOver);
-            dropZone.AddHandler(DragDrop.DragLeaveEvent, DropZone_DragLeave);
-            dropZone.AddHandler(DragDrop.DropEvent, DropZone_Drop);
         }
     }
 
@@ -113,16 +111,22 @@ public partial class MainWindow : Window
 
     private static DragDropEffects GetDragDropEffects(DragEventArgs e)
     {
-        // During DragOver on Windows, file paths are NOT accessible — only format presence can be checked.
-        // We accept if ANY file format is present; validation of extension happens on actual Drop.
-        var formats = e.Data.GetDataFormats();
-        foreach (var fmt in formats)
+        // Use Avalonia 11's recommended API to check for file data.
+        // e.Data.GetFiles() returns non-null when files are being dragged,
+        // even during DragOver when actual paths may not be accessible yet.
+        if (e.Data.GetFiles() != null)
         {
-            if (fmt == DataFormats.Files || fmt == "FileNames" || fmt == "FileName")
-            {
-                return DragDropEffects.Copy;
-            }
+            return DragDropEffects.Copy;
         }
+
+        // Fallback: check via Contains for legacy format strings
+        if (e.Data.Contains(DataFormats.Files)
+            || e.Data.Contains("FileNames")
+            || e.Data.Contains("FileName"))
+        {
+            return DragDropEffects.Copy;
+        }
+
         return DragDropEffects.None;
     }
 

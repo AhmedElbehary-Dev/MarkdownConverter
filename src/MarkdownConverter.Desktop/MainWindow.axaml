@@ -80,6 +80,7 @@
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="8" />
       <Setter Property="Padding" Value="10,8" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
     <Style Selector="ComboBox">
@@ -155,45 +156,9 @@
     </Border>
 
     <Grid Grid.Row="1" Margin="0,16,0,12" ColumnDefinitions="*,18,344">
-      <StackPanel Grid.Column="0" Spacing="16">
-        <Border x:Name="DropZone"
-                Classes="card"
-                Padding="18"
-                IsEnabled="{Binding IsBusy, Converter={StaticResource BoolNot}}"
-                Tapped="DropZone_Tapped"
-                DragDrop.AllowDrop="True"
-                DragDrop.DragOver="DropZone_DragOver"
-                DragDrop.DragLeave="DropZone_DragLeave"
-                DragDrop.Drop="DropZone_Drop">
-          <StackPanel Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Border Classes="subtle" Width="54" Height="54" CornerRadius="14" HorizontalAlignment="Center">
-              <TextBlock Text="MD"
-                         HorizontalAlignment="Center"
-                         VerticalAlignment="Center"
-                         FontWeight="Bold"
-                         Foreground="{DynamicResource AccentStrongBrush}" />
-            </Border>
-
-            <TextBlock Text="Drop markdown file here"
-                       FontWeight="SemiBold"
-                       FontSize="16"
-                       HorizontalAlignment="Center" />
-            <TextBlock Text=".md or .markdown"
-                       Foreground="{DynamicResource TextSecondaryBrush}"
-                       HorizontalAlignment="Center" />
-            <Button Content="Browse"
-                    Classes="primary"
-                    Command="{Binding BrowseCommand}"
-                    HorizontalAlignment="Center" />
-            <TextBlock Text="{Binding SelectedMarkdownPath}"
-                       Foreground="{DynamicResource TextSecondaryBrush}"
-                       TextWrapping="Wrap"
-                       HorizontalAlignment="Center"
-                       MaxWidth="520" />
-          </StackPanel>
-        </Border>
-
-        <Border Classes="card" Padding="16">
+      <DockPanel Grid.Column="0">
+        <!-- Bottom Card: Progress and Options -->
+        <Border DockPanel.Dock="Bottom" Classes="card" Padding="16">
           <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
             <Grid ColumnDefinitions="*,Auto">
               <TextBlock Text="Progress" FontWeight="SemiBold" FontSize="15" />
@@ -238,49 +203,92 @@
             </Border>
           </Grid>
         </Border>
-      </StackPanel>
+
+        <!-- Top Card: Drop Zone (Fills remaining space) -->
+        <Border x:Name="DropZone"
+                Margin="0,0,0,16"
+                Classes="card"
+                Padding="18"
+                IsEnabled="{Binding IsBusy, Converter={StaticResource BoolNot}}"
+                Tapped="DropZone_Tapped"
+                DragDrop.AllowDrop="True"
+                DragDrop.DragOver="DropZone_DragOver"
+                DragDrop.DragLeave="DropZone_DragLeave"
+                DragDrop.Drop="DropZone_Drop">
+          <StackPanel Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Border Classes="subtle" Width="54" Height="54" CornerRadius="14" HorizontalAlignment="Center">
+              <TextBlock Text="MD"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"
+                         FontWeight="Bold"
+                         Foreground="{DynamicResource AccentStrongBrush}" />
+            </Border>
+
+            <TextBlock Text="Drop markdown file here"
+                       FontWeight="SemiBold"
+                       FontSize="16"
+                       HorizontalAlignment="Center" />
+            <TextBlock Text=".md or .markdown"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
+                       HorizontalAlignment="Center" />
+            <Button Content="Browse"
+                    Classes="primary"
+                    Command="{Binding BrowseCommand}"
+                    HorizontalAlignment="Center" />
+            <TextBlock Text="{Binding SelectedMarkdownPath}"
+                       Foreground="{DynamicResource TextSecondaryBrush}"
+                       TextWrapping="Wrap"
+                       HorizontalAlignment="Center"
+                       MaxWidth="520" />
+          </StackPanel>
+        </Border>
+
+      </DockPanel>
 
       <Border Grid.Column="2" Classes="card" Padding="16">
-        <StackPanel Spacing="14">
-          <Border Background="#1F2631" CornerRadius="10" Padding="10,8">
-            <TextBlock Text="Conversion Options" FontWeight="SemiBold" FontSize="16" />
-          </Border>
-
-          <StackPanel Spacing="6">
-            <TextBlock Text="Output Format" Foreground="{DynamicResource TextSecondaryBrush}" />
-            <ComboBox ItemsSource="{Binding Formats}"
-                      SelectedValue="{Binding SelectedFormat}"
-                      SelectedValueBinding="{Binding Value}">
-              <ComboBox.ItemTemplate>
-                <DataTemplate>
-                  <TextBlock Text="{Binding Label}" />
-                </DataTemplate>
-              </ComboBox.ItemTemplate>
-            </ComboBox>
-          </StackPanel>
-
-          <StackPanel Spacing="6">
-            <TextBlock Text="Output Folder" Foreground="{DynamicResource TextSecondaryBrush}" />
-            <TextBox Text="{Binding OutputFolder}" />
-            <Button Content="Browse Folder"
-                    Command="{Binding BrowseOutputFolderCommand}"
-                    HorizontalAlignment="Left" />
-          </StackPanel>
-
-          <Border Classes="subtle" Padding="12">
+        <DockPanel>
+          <!-- Pinned to bottom -->
+          <Border DockPanel.Dock="Bottom" Classes="subtle" Padding="12">
             <StackPanel Spacing="6">
-              <TextBlock Text="Feature Parity Checklist" FontWeight="SemiBold" />
-              <TextBlock Text="• Drag and drop input" Foreground="{DynamicResource TextSecondaryBrush}" />
-              <TextBlock Text="• Browse file and folder" Foreground="{DynamicResource TextSecondaryBrush}" />
-              <TextBlock Text="• Copy and open output path" Foreground="{DynamicResource TextSecondaryBrush}" />
-              <TextBlock Text="• Progress, toast, and modal result" Foreground="{DynamicResource TextSecondaryBrush}" />
-              <TextBlock Text="• PDF, DOCX, XLSX conversion via existing core"
+              <TextBlock Text="Advanced Features" FontWeight="SemiBold" />
+              <TextBlock Text="• Drag &amp; drop .md files directly" Foreground="{DynamicResource TextSecondaryBrush}" />
+              <TextBlock Text="• Bulk browse files and folders" Foreground="{DynamicResource TextSecondaryBrush}" />
+              <TextBlock Text="• Instant copy and open output" Foreground="{DynamicResource TextSecondaryBrush}" />
+              <TextBlock Text="• Real-time progress monitoring" Foreground="{DynamicResource TextSecondaryBrush}" />
+              <TextBlock Text="• PDF, Word, and Excel support"
                          Foreground="{DynamicResource TextSecondaryBrush}"
                          TextWrapping="Wrap" />
             </StackPanel>
           </Border>
 
-        </StackPanel>
+          <!-- Top content fills the remaining top area natively -->
+          <StackPanel Spacing="14">
+            <Border Background="#1F2631" CornerRadius="10" Padding="10,8">
+              <TextBlock Text="Conversion Options" FontWeight="SemiBold" FontSize="16" />
+            </Border>
+
+            <StackPanel Spacing="6">
+              <TextBlock Text="Output Format" Foreground="{DynamicResource TextSecondaryBrush}" />
+              <ComboBox ItemsSource="{Binding Formats}"
+                        SelectedValue="{Binding SelectedFormat}"
+                        SelectedValueBinding="{Binding Value}">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding Label}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+              <TextBlock Text="Output Folder" Foreground="{DynamicResource TextSecondaryBrush}" />
+              <TextBox Text="{Binding OutputFolder}" />
+              <Button Content="Browse Folder"
+                      Command="{Binding BrowseOutputFolderCommand}"
+                      HorizontalAlignment="Left" />
+            </StackPanel>
+          </StackPanel>
+        </DockPanel>
       </Border>
     </Grid>
 

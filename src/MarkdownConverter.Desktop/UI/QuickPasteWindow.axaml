@@ -66,6 +66,7 @@
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="8" />
       <Setter Property="Padding" Value="10,8" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
     <Style Selector="ComboBox">
@@ -126,13 +127,18 @@
             <TextBox Text="{Binding Title}" Watermark="Auto-detected from headings..." />
           </StackPanel>
 
-          <TextBox Grid.Row="1" 
-                   Text="{Binding MarkdownContent}" 
-                   AcceptsReturn="True" 
-                   TextWrapping="Wrap" 
-                   FontFamily="Consolas, Couriser New, Monospace"
-                   Watermark="Paste markdown here..."
-                   VerticalContentAlignment="Top" />
+          <!-- Wrap in border to avoid Avalonia selection bug with padded text wrapping -->
+          <Border Grid.Row="1" Background="#202733" BorderBrush="{DynamicResource StrokeBrush}" BorderThickness="1" CornerRadius="8" Padding="10,8">
+            <TextBox Text="{Binding MarkdownContent}" 
+                     AcceptsReturn="True" 
+                     TextWrapping="Wrap" 
+                     FontFamily="Consolas, Courier New, Monospace"
+                     Watermark="Paste markdown here..."
+                     VerticalContentAlignment="Top"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     Padding="0" />
+          </Border>
 
           <Border Grid.Row="2" Classes="subtle" Margin="0,14,0,0" Padding="12">
             <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
