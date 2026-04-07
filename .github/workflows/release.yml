@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 jobs:
-  build-windows-exe-msi:
+  build-windows:
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -24,30 +24,19 @@ jobs:
 
       - name: Install Inno Setup
         run: choco install innosetup --no-progress
-      
-      - name: Compile Inno Setup Script
+
+      - name: Build Windows Setup .exe
         run: |
           $ver = "${{ github.ref_name }}".TrimStart('v')
-          (Get-Content .\packaging\windows\setup.iss) -replace 'AppVersion=2.0.2', "AppVersion=$ver" | Set-Content .\packaging\windows\setup.iss
+          (Get-Content .\packaging\windows\setup.iss) -replace 'AppVersion=.*', "AppVersion=$ver" | Set-Content .\packaging\windows\setup.iss
           mkdir release -ea 0
           iscc .\packaging\windows\setup.iss
 
-      - name: Setup WiX toolset
-        run: dotnet tool install --global wix
-
-      - name: Build Windows MSI with WiX Toolset
-        run: |
-          $ver = "${{ github.ref_name }}".TrimStart('v')
-          (Get-Content .\packaging\windows\setup.wxs) -replace 'Version="2.0.2"', "Version=`"$ver`"" | Set-Content .\packaging\windows\setup.wxs
-          wix build .\packaging\windows\setup.wxs -o .\release\MarkdownConverter.msi
-        
-      - name: Upload Windows Output
+      - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: windows-installers
-          path: |
-            release\MarkdownConverter-Setup-x64.exe
-            release\MarkdownConverter.msi
+          name: windows-installer
+          path: release\*.exe
 
   build-linux-deb:
     runs-on: ubuntu-latest
@@ -59,6 +48,11 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg
 
       - name: Publish Linux-x64
         run: |
@@ -72,14 +66,154 @@ jobs:
           cd ./packaging/linux
           ./build-deb.sh ${{ github.ref_name }}
 
-      - name: Upload Debian Output
+      - name: Create Portable tar.gz
+        run: |
+          mkdir -p release
+          tar czf "release/MarkdownConverter-linux-x64-portable.tar.gz" \
+            -C bin/Release/net10.0/linux-x64/publish .
+
+      - name: Upload Debian & Portable Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-installers
-          path: release/*.deb
+          name: linux-deb-installers
+          path: |
+            release/*.deb
+            release/MarkdownConverter-linux-x64-portable.tar.gz
+
+  build-linux-appimage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install AppImage dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfuse2 imagemagick
+
+      - name: Publish Linux-x64
+        run: |
+          ver=$(echo "${{ github.ref_name }}" | sed 's/^v//')
+          dotnet publish MarkdownConverter.csproj -c Release -r linux-x64 --self-contained true /p:Version=$ver /p:InformationalVersion=${{ github.ref_name }}
+
+      - name: Build AppImage
+        run: |
+          mkdir -p release
+          chmod +x ./packaging/linux/build-appimage.sh
+          ./packaging/linux/build-appimage.sh ${{ github.ref_name }}
+
+      - name: Upload AppImage Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-appimage
+          path: release/*.AppImage
+
+  build-linux-rpm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install RPM build tools
+        run: sudo apt-get update && sudo apt-get install -y rpm
+
+      - name: Publish Linux-x64
+        run: |
+          ver=$(echo "${{ github.ref_name }}" | sed 's/^v//')
+          dotnet publish MarkdownConverter.csproj -c Release -r linux-x64 --self-contained true /p:Version=$ver /p:InformationalVersion=${{ github.ref_name }}
+
+      - name: Build RPM Package
+        run: |
+          mkdir -p release
+          chmod +x ./packaging/linux/build-rpm.sh
+          ./packaging/linux/build-rpm.sh ${{ github.ref_name }}
+
+      - name: Upload RPM Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-rpm
+          path: release/*.rpm
+
+  build-linux-flatpak:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install Flatpak dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+          flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+      - name: Publish Linux-x64
+        run: |
+          ver=$(echo "${{ github.ref_name }}" | sed 's/^v//')
+          dotnet publish MarkdownConverter.csproj -c Release -r linux-x64 --self-contained true /p:Version=$ver /p:InformationalVersion=${{ github.ref_name }}
+
+      - name: Build Flatpak
+        run: |
+          mkdir -p release
+          chmod +x ./packaging/linux/build-flatpak.sh
+          ./packaging/linux/build-flatpak.sh ${{ github.ref_name }}
+
+      - name: Upload Flatpak Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-flatpak
+          path: release/*.flatpak
+
+  build-linux-snap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install Snap dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y snapd
+          sudo snap install snapcraft --classic
+
+      - name: Publish Linux-x64
+        run: |
+          ver=$(echo "${{ github.ref_name }}" | sed 's/^v//')
+          dotnet publish MarkdownConverter.csproj -c Release -r linux-x64 --self-contained true /p:Version=$ver /p:InformationalVersion=${{ github.ref_name }}
+
+      - name: Build Snap
+        run: |
+          mkdir -p release
+          chmod +x ./packaging/linux/build-snap.sh
+          ./packaging/linux/build-snap.sh ${{ github.ref_name }}
+
+      - name: Upload Snap Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-snap
+          path: release/*.snap
 
   release:
-    needs: [build-windows-exe-msi, build-linux-deb]
+    needs: [build-windows, build-linux-deb, build-linux-appimage, build-linux-rpm, build-linux-flatpak, build-linux-snap]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -95,47 +229,55 @@ jobs:
           path: artifacts
           merge-multiple: true
 
+      - name: List artifacts for debugging
+        run: find artifacts/ -type f | sort
+
       - name: Generate Release Body
         shell: pwsh
         run: |
           $ver = "${{ github.ref_name }}".TrimStart('v')
-          # Find the previous tag to create comparison link
           $prevTag = ""
           try {
               $prevTag = git describe --tags --abbrev=0 ${{ github.ref_name }}^ 2>$null
           } catch {
               Write-Warning "Could not find previous tag via git."
           }
-          if ([string]::IsNullOrWhiteSpace($prevTag)) { $prevTag = "v2.0.5" } # Fallback
+          if ([string]::IsNullOrWhiteSpace($prevTag)) { $prevTag = "v2.0.7" }
 
-          
           $body = @"
-          This release of **Markdown Converter Pro** includes several updates across all platforms.
-          
-          ### ✨ Features & Improvements
-          - **PDF Editor Module**: Introduced a new module for deleting pages and basic PDF editing functionality.
+          ## 🚀 What's New in v$ver
 
-          ### 📱 Multi-Platform Support
-          - **Windows**: Improved installer stability with Inno Setup and MSI.
-          - **Linux**: Optimized Debian (.deb) package generation.
-          
-          ### 🛠 Changes in this version
-          - Dynamic versioning injected during build.
-          - Multi-OS CI matrix for verified stability.
-          - UI version display synced with release tags.
-          
+          ### ✨ Features & Improvements
+          - Enhanced version checking to prevent accidental downgrades.
+          - Improved uninstallation cleanup — removes all files, shortcuts, and registry entries.
+
+          ### 📦 Downloads
+
+          | Platform | File | Description |
+          |----------|------|-------------|
+          | **Windows** | `MarkdownConverter-Setup-x64.exe` | Standard installer (next, next, finish) |
+          | **Linux** | `.deb` | Debian / Ubuntu |
+          | **Linux** | `.rpm` | Fedora / RHEL / CentOS |
+          | **Linux** | `.flatpak` | Any distro via Flatpak |
+          | **Linux** | `.snap` | Ubuntu / Snap-enabled |
+          | **Linux** | `.AppImage` | Any distro, no install |
+
           ---
           **Full Changelog**: https://github.com/AhmedElbehary-Dev/MarkdownConverter/compare/$($prevTag)...${{ github.ref_name }}
           "@
+          $body = ($body -split "`n" | ForEach-Object { $_.TrimStart() }) -join "`n"
           $body | Set-Content release_notes.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: "🚀 What's New in ${{ github.ref_name }}"
+          name: "MarkdownConverter ${{ github.ref_name }}"
           body_path: release_notes.md
           files: |
-            artifacts/MarkdownConverter-Setup-x64.exe
-            artifacts/MarkdownConverter.msi
+            artifacts/*.exe
             artifacts/*.deb
+            artifacts/*.rpm
+            artifacts/*.AppImage
+            artifacts/*.flatpak
+            artifacts/*.snap
           generate_release_notes: false

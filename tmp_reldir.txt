@@ -1,0 +1,92 @@
+
+    Directory: D:\Work\MarkdownConverter\release
+
+Mode                 LastWriteTime         Length N
+                                                  a
+                                                  m
+                                                  e
+----                 -------------         ------ -
+-a---            4/6/2026 10:02 PM       54267345 M
+                                                  a
+                                                  r
+                                                  k
+                                                  d
+                                                  o
+                                                  w
+                                                  n
+                                                  C
+                                                  o
+                                                  n
+                                                  v
+                                                  e
+                                                  r
+                                                  t
+                                                  e
+                                                  r
+                                                  -
+                                                  w
+                                                  i
+                                                  n
+                                                  -
+                                                  x
+                                                  6
+                                                  4
+                                                  -
+                                                  p
+                                                  o
+                                                  r
+                                                  t
+                                                  a
+                                                  b
+                                                  l
+                                                  e
+                                                  .
+                                                  z
+                                                  i
+                                                  p
+-a---            4/6/2026 10:02 PM       46080000 M
+                                                  a
+                                                  r
+                                                  k
+                                                  d
+                                                  o
+                                                  w
+                                                  n
+                                                  C
+                                                  o
+                                                  n
+                                                  v
+                                                  e
+                                                  r
+                                                  t
+                                                  e
+                                                  r
+                                                  .
+                                                  m
+                                                  s
+                                                  i
+-a---            4/6/2026 10:02 PM          78509 M
+                                                  a
+                                                  r
+                                                  k
+                                                  d
+                                                  o
+                                                  w
+                                                  n
+                                                  C
+                                                  o
+                                                  n
+                                                  v
+                                                  e
+                                                  r
+                                                  t
+                                                  e
+                                                  r
+                                                  .
+                                                  w
+                                                  i
+                                                  x
+                                                  p
+                                                  d
+                                                  b
+

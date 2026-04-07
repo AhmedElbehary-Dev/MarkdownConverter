@@ -1,27 +1,66 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Package Name="MarkdownConverter" Manufacturer="MarkdownConverter Team" Version="2.0.8" UpgradeCode="783eb077-d4fa-4dc4-bbf8-661cd9dc6ee8">
-    <MajorUpgrade DowngradeErrorMessage="A newer version is already installed." />
+    <MajorUpgrade 
+      DowngradeErrorMessage="A newer version is already installed." 
+      AllowDowngrades="no"
+      AllowSameVersionUpgrades="yes"
+      IgnoreRemoveFailure="no" />
     <MediaTemplate EmbedCab="yes" />
-    
+
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/AhmedElbehary-Dev/MarkdownConverter" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.ico" />
+
+    <Icon Id="AppIcon.ico" SourceFile="..\..\src\MarkdownConverter.Desktop\Assets\md_converter.ico" />
+
     <StandardDirectory Id="ProgramFiles64Folder">
-      <Directory Id="INSTALLFOLDER" Name="MarkdownConverter" />
+      <Directory Id="INSTALLFOLDER" Name="MarkdownConverter">
+        <Component Id="CleanupInstallDir" Guid="983eb077-d4fa-4dc4-bbf8-661cd9dc6ee7">
+          <RegistryValue Root="HKCU" Key="Software\MarkdownConverterTeam\MarkdownConverter\InstallDir" Name="path" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
+          <RemoveFolder Id="RemoveInstallDir" Directory="INSTALLFOLDER" On="uninstall" />
+        </Component>
+      </Directory>
     </StandardDirectory>
-    
+
     <StandardDirectory Id="ProgramMenuFolder">
-      <Component Id="ApplicationShortcut" Guid="983eb077-d4fa-4dc4-bbf8-661cd9dc6ee9">
-        <Shortcut Id="ApplicationStartMenuShortcut" Name="MarkdownConverter" Description="Markdown to PDF Converter" Target="[INSTALLFOLDER]MarkdownConverter.exe" WorkingDirectory="INSTALLFOLDER" />
-        <RemoveFolder Id="CleanUpShortCut" Directory="ProgramMenuFolder" On="uninstall" />
-        <RegistryValue Root="HKCU" Key="Software\MarkdownConverterTeam\MarkdownConverter" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+      <Directory Id="ProgramMenuMarkdownConverter" Name="MarkdownConverter">
+        <Component Id="ApplicationShortcut" Guid="983eb077-d4fa-4dc4-bbf8-661cd9dc6ee9">
+          <Shortcut 
+            Id="ApplicationStartMenuShortcut" 
+            Name="MarkdownConverter" 
+            Description="Markdown to PDF, Word, and Excel Converter" 
+            Target="[INSTALLFOLDER]MarkdownConverter.exe" 
+            WorkingDirectory="INSTALLFOLDER" 
+            Icon="AppIcon.ico" />
+          <RemoveFolder Id="RemoveStartMenuShortcut" Directory="ProgramMenuMarkdownConverter" On="uninstall" />
+          <RemoveFolder Id="RemoveStartMenuDir" Directory="ProgramMenuMarkdownConverter" On="uninstall" />
+          <RegistryValue Root="HKCU" Key="Software\MarkdownConverterTeam\MarkdownConverter\Shortcuts" Name="startmenu" Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder">
+      <Component Id="DesktopShortcut" Guid="983eb077-d4fa-4dc4-bbf8-661cd9dc6e10">
+        <Condition>DESKTOP_SHORTCUT</Condition>
+        <Shortcut 
+          Id="DesktopShortcut" 
+          Name="MarkdownConverter" 
+          Description="Markdown to PDF, Word, and Excel Converter" 
+          Target="[INSTALLFOLDER]MarkdownConverter.exe" 
+          WorkingDirectory="INSTALLFOLDER" 
+          Icon="AppIcon.ico" />
+        <RegistryValue Root="HKCU" Key="Software\MarkdownConverterTeam\MarkdownConverter\Shortcuts" Name="desktop" Type="integer" Value="1" KeyPath="yes" />
       </Component>
     </StandardDirectory>
 
     <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
-      <Files Include="..\..\bin\Release\net10.0\win-x64\publish\**" />
+      <Files Include="..\..\bin\Release\net10.0\win-x64\publish\**" Exclude="..\..\bin\Release\net10.0\win-x64\publish\*.pdb" />
     </ComponentGroup>
-    
-    <Feature Id="Main">
+
+    <Feature Id="Main" Title="MarkdownConverter" Level="1">
       <ComponentGroupRef Id="AppFiles" />
       <ComponentRef Id="ApplicationShortcut" />
+      <ComponentRef Id="CleanupInstallDir" />
+      <ComponentRef Id="DesktopShortcut" />
     </Feature>
   </Package>
 </Wix>

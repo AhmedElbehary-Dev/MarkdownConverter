@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.1
+Type=Application
+Name=Markdown Converter
+GenericName=Markdown Converter
+Comment=Convert Markdown to PDF, Word, and Excel
+Exec=markdownconverter %F
+Icon=com.markdownconverter.app
+Terminal=false
+Categories=Utility;Office;TextEditor;Development;
+MimeType=text/markdown;text/x-markdown;
+Keywords=markdown;pdf;word;excel;converter;
+StartupWMClass=MarkdownConverter
+StartupNotify=true

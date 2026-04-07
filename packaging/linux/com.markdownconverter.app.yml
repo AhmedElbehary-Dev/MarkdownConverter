@@ -1,0 +1,58 @@
+app-id: com.markdownconverter.app
+runtime: org.freedesktop.Platform
+runtime-version: '2.0.8'
+sdk: org.freedesktop.Sdk
+base: org.freedesktop.Platform.BaseApp
+base-version: '2.0.8'
+command: markdownconverter
+separate-locales: false
+
+finish-args:
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --socket=pulseaudio
+  - --share=network
+  - --device=dri
+  - --filesystem=home
+  - --filesystem=xdg-download
+
+modules:
+  - name: markdownconverter
+    buildsystem: simple
+    build-commands:
+      # Create installation directory
+      - mkdir -p /app/lib/markdownconverter
+      - mkdir -p /app/bin
+      - mkdir -p /app/share/applications
+      - mkdir -p /app/share/icons/hicolor/256x256/apps
+
+      # Copy application files
+      - cp -r publish/* /app/lib/markdownconverter/
+      - chmod +x /app/lib/markdownconverter/MarkdownConverter
+
+      # Create wrapper script
+      - |
+        cat > /app/bin/markdownconverter << 'WRAPPER'
+        #!/bin/sh
+        export DOTNET_ROOT=/app/lib/markdownconverter
+        export PATH=$DOTNET_ROOT:$PATH
+        export LD_LIBRARY_PATH=/app/lib/markdownconverter:$LD_LIBRARY_PATH
+        exec /app/lib/markdownconverter/MarkdownConverter "$@"
+        WRAPPER
+      - chmod +x /app/bin/markdownconverter
+
+      # Install desktop file
+      - cp com.markdownconverter.app.desktop /app/share/applications/com.markdownconverter.app.desktop
+
+      # Install icon
+      - cp md_converter.png /app/share/icons/hicolor/256x256/apps/com.markdownconverter.app.png
+
+    sources:
+      - type: dir
+        path: ../../bin/Release/net10.0/linux-x64/publish
+        dest: publish
+      - type: file
+        path: com.markdownconverter.app.desktop
+      - type: file
+        path: ../../src/MarkdownConverter.Desktop/Assets/md_converter.png
