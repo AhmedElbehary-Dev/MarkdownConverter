@@ -105,11 +105,8 @@ fi
 /usr/lib/markdownconverter/
 /usr/bin/markdownconverter
 /usr/share/applications/markdownconverter.desktop
-%if 0%{?_with_icon:1}
-/usr/share/pixmaps/markdownconverter.ico
-%endif
-/usr/share/pixmaps/markdownconverter.png
-/usr/share/icons/hicolor/256x256/apps/markdownconverter.png
+/usr/share/pixmaps/markdownconverter.*
+/usr/share/icons/hicolor/256x256/apps/markdownconverter.*
 
 %changelog
 * %{date} MarkdownConverter Team
