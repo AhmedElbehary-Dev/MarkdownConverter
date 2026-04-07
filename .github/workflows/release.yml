@@ -84,7 +84,7 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Install RPM build tools
-        run: sudo apt-get update && sudo apt-get install -y rpm
+        run: sudo apt-get update && sudo apt-get install -y rpm patchelf
 
       - name: Publish Linux-x64
         run: |
@@ -159,37 +159,33 @@ jobs:
 
       - name: Generate Release Body
         shell: pwsh
-        run: >
-          $ver = "${{ github.ref_name }}".TrimStart('v');
-          $prevTag = "";
-          try { $prevTag = git describe --tags --abbrev=0 "${{ github.ref_name }}^" 2>$null } catch {};
-          if ([string]::IsNullOrWhiteSpace($prevTag)) { $prevTag = "v2.0.7" };
-          $r = [char]0x1F680; $s = [char]0x2728; $p = [char]0x1F4F1; $t = [char]0x1F6E0;
-          $lines = @(
-            "This release of **Markdown Converter Pro** includes several updates across all platforms.",
-            "",
-            "$s FEATURES & IMPROVEMENTS",
-            "* Redesigned Main Window: Modern Grid-based layout with drag-and-drop support and intuitive conversion controls.",
-            "* Quick Paste UI: Paste markdown content directly without needing to open a file.",
-            "* Resolved all CodeQL security alerts for unmanaged code and error handling.",
-            "",
-            "$p MULTI-PLATFORM SUPPORT",
-            "* **Windows**: .exe installer (Inno Setup) - Standard installer experience.",
-            "* **Linux**: .deb package (Debian / Ubuntu) with proper maintainer scripts.",
-            "* **Linux**: .rpm package (Fedora / RHEL / CentOS) with cleanup scripts.",
-            "* **Linux**: .AppImage - Universal, no install required.",
-            "",
-            "$t CHANGES IN THIS VERSION",
-            "* Implemented Avalonia desktop project architecture.",
-            "* Added maintainer scripts for Debian and RPM packages.",
-            "* Enhanced AppImage with AppStream metadata and improved icon handling.",
-            "* Automated version bumping during the release process.",
-            "",
-            "----------------------------------------",
-            "",
-            "Full Changelog: $prevTag...v$ver"
-          );
-          ($lines -join "`n") | Set-Content release_notes.md
+        run: |
+          $ver = "${{ github.ref_name }}".TrimStart('v')
+          $prevTag = ""
+          try { $prevTag = git describe --tags --abbrev=0 "${{ github.ref_name }}^" 2>$null } catch {}
+          if ([string]::IsNullOrWhiteSpace($prevTag)) { $prevTag = "v2.0.7" }
+          $r = [char]0x1F680
+          $s = [char]0x2728
+          $p = [char]0x1F4F1
+          $t = [char]0x1F6E0
+          $body = "$r WHAT'S NEW IN V$ver`n"
+          $body += "`nThis release of **Markdown Converter Pro** includes several updates across all platforms."
+          $body += "`n`n$s FEATURES & IMPROVEMENTS"
+          $body += "`n* Redesigned Main Window: Modern Grid-based layout with drag-and-drop support."
+          $body += "`n* Quick Paste UI: Paste markdown content directly without opening a file."
+          $body += "`n* Resolved all CodeQL security alerts for unmanaged code and error handling."
+          $body += "`n`n$p MULTI-PLATFORM SUPPORT"
+          $body += "`n* **Windows**: .exe installer (Inno Setup)."
+          $body += "`n* **Linux**: .deb package (Debian / Ubuntu) with proper maintainer scripts."
+          $body += "`n* **Linux**: .rpm package (Fedora / RHEL / CentOS) with cleanup scripts."
+          $body += "`n* **Linux**: .AppImage - Universal, no install required."
+          $body += "`n`n$t CHANGES IN THIS VERSION"
+          $body += "`n* Implemented Avalonia desktop project architecture."
+          $body += "`n* Added maintainer scripts for Debian and RPM packages."
+          $body += "`n* Enhanced AppImage with AppStream metadata."
+          $body += "`n`n----------------------------------------"
+          $body += "`n`nFull Changelog: https://github.com/AhmedElbehary-Dev/MarkdownConverter/compare/$prevTag...v$ver"
+          $body | Set-Content release_notes.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
