@@ -264,30 +264,22 @@ jobs:
           }
           if ([string]::IsNullOrWhiteSpace($prevTag)) { $prevTag = "v2.0.7" }
 
-          $body = @"
-## 🚀 WHAT'S NEW IN V$ver
-
-This release of **Markdown Converter Pro** includes several updates across all platforms.
-
-### ✨ FEATURES & IMPROVEMENTS
-* Enhanced version checking to prevent accidental downgrades.
-* Improved uninstallation cleanup — removes all files, shortcuts, and registry entries.
-* Expanded Linux distribution support with Flatpak and Snap packages.
-
-### 📱 MULTI-PLATFORM SUPPORT
-* **Windows**: Single .exe installer (next, next, finish) with Inno Setup.
-* **Linux**: Debian (.deb), RPM (.rpm), Flatpak, Snap, and AppImage for maximum compatibility.
-
-### 🛠 CHANGES IN THIS VERSION
-* Streamlined Windows release to a single .exe installer.
-* Added maintainer scripts for Debian and RPM packages.
-* Added Flatpak and Snap packaging for universal Linux compatibility.
-* Enhanced AppImage with AppStream metadata and Zstd compression.
-
-----------------------------------------
-
-Full Changelog: https://github.com/AhmedElbehary-Dev/MarkdownConverter/compare/$prevTag...$env:VERSION
-"@
+          $body = "## " + [char]0x1F680 + " WHAT'S NEW IN V$ver`n"
+          $body += "`nThis release of **Markdown Converter Pro** includes several updates across all platforms.`n"
+          $body += "`n### " + [char]0x2728 + " FEATURES & IMPROVEMENTS`n"
+          $body += "* Enhanced version checking to prevent accidental downgrades.`n"
+          $body += "* Improved uninstallation cleanup removes all files, shortcuts, and registry entries.`n"
+          $body += "* Expanded Linux distribution support with Flatpak and Snap packages.`n"
+          $body += "`n### " + [char]0x1F4F1 + " MULTI-PLATFORM SUPPORT`n"
+          $body += "* **Windows**: Single .exe installer (next, next, finish) with Inno Setup.`n"
+          $body += "* **Linux**: Debian (.deb), RPM (.rpm), Flatpak, Snap, and AppImage for maximum compatibility.`n"
+          $body += "`n### " + [char]0x1F6E0 + " CHANGES IN THIS VERSION`n"
+          $body += "* Streamlined Windows release to a single .exe installer.`n"
+          $body += "* Added maintainer scripts for Debian and RPM packages.`n"
+          $body += "* Added Flatpak and Snap packaging for universal Linux compatibility.`n"
+          $body += "* Enhanced AppImage with AppStream metadata and Zstd compression.`n"
+          $body += "`n----------------------------------------`n"
+          $body += "`nFull Changelog: https://github.com/AhmedElbehary-Dev/MarkdownConverter/compare/$prevTag...$($env:VERSION)`n"
 
           $body | Set-Content release_notes.md
 
