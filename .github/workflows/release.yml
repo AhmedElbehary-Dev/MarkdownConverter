@@ -219,6 +219,7 @@ jobs:
           path: release/*.snap
 
   release:
+    if: always()
     needs: [build-windows, build-linux-deb, build-linux-appimage, build-linux-rpm, build-linux-flatpak, build-linux-snap]
     runs-on: ubuntu-latest
     permissions:
@@ -303,3 +304,4 @@ Full Changelog: https://github.com/AhmedElbehary-Dev/MarkdownConverter/compare/$
             artifacts/*.flatpak
             artifacts/*.snap
           generate_release_notes: false
+          fail_on_unmatched_files: false
