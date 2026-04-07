@@ -29,11 +29,16 @@ mkdir -p "$OUTPUT_DIR"
 # Copy published files to SOURCES as tarball
 cp -r "$PUBLISH_DIR" "$RPM_BUILD_DIR/SOURCES/publish"
 
-# Copy icons
+# Copy icons - ensure PNG is always available for RPM %files section
 if [ -f "$ICON_PNG" ]; then
     cp "$ICON_PNG" "$RPM_BUILD_DIR/SOURCES/md_converter.png"
+    echo "Copied PNG icon: $ICON_PNG"
 elif [ -f "$ICON_ICO" ]; then
+    echo "Warning: PNG icon not found, falling back to ICO (RPM will fail without PNG)"
     cp "$ICON_ICO" "$RPM_BUILD_DIR/SOURCES/md_converter.ico"
+else
+    echo "Error: No icon files found"
+    exit 1
 fi
 
 # Copy spec file

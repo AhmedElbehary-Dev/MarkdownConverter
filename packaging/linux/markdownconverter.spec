@@ -105,11 +105,11 @@ fi
 /usr/lib/markdownconverter/
 /usr/bin/markdownconverter
 /usr/share/applications/markdownconverter.desktop
-/usr/share/pixmaps/markdownconverter.*
-/usr/share/icons/hicolor/256x256/apps/markdownconverter.*
+/usr/share/pixmaps/markdownconverter.png
+/usr/share/icons/hicolor/256x256/apps/markdownconverter.png
 
 %changelog
-* %{date} MarkdownConverter Team
+* Tue Apr 07 2026 MarkdownConverter Team
 - Improved uninstallation cleanup with postun scripts
 - Added desktop database and icon cache updates
 - Enhanced desktop entry with MIME types and keywords
