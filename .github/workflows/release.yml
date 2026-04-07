@@ -164,10 +164,10 @@ jobs:
           $prevTag = ""
           try { $prevTag = git describe --tags --abbrev=0 "${{ github.ref_name }}^" 2>$null } catch {}
           if ([string]::IsNullOrWhiteSpace($prevTag)) { $prevTag = "v2.0.7" }
-          $r = [char]0x1F680
-          $s = [char]0x2728
-          $p = [char]0x1F4F1
-          $t = [char]0x1F6E0
+          $r = "`u{1F680}"
+          $s = "`u{2728}"
+          $p = "`u{1F4F1}"
+          $t = "`u{1F6E0}"
           $body = "$r WHAT'S NEW IN V$ver`n"
           $body += "`nThis release of **Markdown Converter Pro** includes several updates across all platforms."
           $body += "`n`n$s FEATURES & IMPROVEMENTS"
@@ -185,7 +185,7 @@ jobs:
           $body += "`n* Enhanced AppImage with AppStream metadata."
           $body += "`n`n----------------------------------------"
           $body += "`n`nFull Changelog: https://github.com/AhmedElbehary-Dev/MarkdownConverter/compare/$prevTag...v$ver"
-          $body | Set-Content release_notes.md
+          $body | Set-Content -Encoding UTF8 release_notes.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
