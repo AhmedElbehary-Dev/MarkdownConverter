@@ -35,88 +35,9 @@ begin
   Result := sUnInstallString;
 end;
 
-function GetInstalledVersion(): String;
-var
-  sUnInstPath: String;
-  sVersion: String;
-begin
-  sUnInstPath := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\{#emit SetupSetting("AppId")}_is1');
-  sVersion := '';
-  if not RegQueryStringValue(HKLM, sUnInstPath, 'DisplayVersion', sVersion) then
-    RegQueryStringValue(HKCU, sUnInstPath, 'DisplayVersion', sVersion);
-  Result := sVersion;
-end;
-
-function CompareVersion(Ver1, Ver2: String): Integer;
-var
-  i, p1, p2: Integer;
-  s1, s2, part1, part2: String;
-  num1, num2: Integer;
-begin
-  s1 := Ver1 + '.';
-  s2 := Ver2 + '.';
-  Result := 0;
-
-  while (Length(s1) > 0) or (Length(s2) > 0) do
-  begin
-    p1 := Pos('.', s1);
-    p2 := Pos('.', s2);
-
-    if p1 > 0 then begin
-      part1 := Copy(s1, 1, p1 - 1);
-      s1 := Copy(s1, p1 + 1, Length(s1));
-    end else if Length(s1) > 0 then begin
-      part1 := s1;
-      s1 := '';
-    end else begin
-      part1 := '0';
-    end;
-
-    if p2 > 0 then begin
-      part2 := Copy(s2, 1, p2 - 1);
-      s2 := Copy(s2, p2 + 1, Length(s2));
-    end else if Length(s2) > 0 then begin
-      part2 := s2;
-      s2 := '';
-    end else begin
-      part2 := '0';
-    end;
-
-    num1 := StrToIntDef(part1, 0);
-    num2 := StrToIntDef(part2, 0);
-
-    if num1 > num2 then begin
-      Result := 1;
-      Exit;
-    end;
-    if num1 < num2 then begin
-      Result := -1;
-      Exit;
-    end;
-  end;
-end;
-
 function IsUpgrade(): Boolean;
 begin
   Result := (GetUninstallString() <> '');
-end;
-
-function IsDowngrade(): Boolean;
-var
-  InstalledVersion, CurrentVersion: String;
-  CmpResult: Integer;
-begin
-  InstalledVersion := GetInstalledVersion();
-  CurrentVersion := '{#emit SetupSetting("AppVersion")}';
-  
-  if InstalledVersion = '' then
-  begin
-    Result := False;
-    Exit;
-  end;
-  
-  CmpResult := CompareVersion(InstalledVersion, CurrentVersion);
-  Result := (CmpResult > 0); // Installed version is newer
 end;
 
 function UnInstallOldVersion(): Integer;
@@ -136,20 +57,6 @@ begin
     Result := 1;
 end;
 
-function InitializeSetup(): Boolean;
-begin
-  Result := True;
-  
-  if IsDowngrade() then
-  begin
-    if MsgBox('A newer version is already installed. Downgrading may cause issues. Do you want to continue?', mbError, MB_YESNO) = IDNO then
-    begin
-      Result := False;
-      Exit;
-    end;
-  end;
-end;
-
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if (CurStep = ssInstall) then
@@ -165,10 +72,7 @@ procedure CurUninstallStepChanged(CurStep: TUninstallStep);
 begin
   if CurStep = usPostUninstall then
   begin
-    // Remove all user data and configuration files
     DelTree(ExpandConstant('{app}'), True, True, True);
-    
-    // Remove Start Menu shortcuts folder
     DelTree(ExpandConstant('{group}'), True, True, False);
   end;
 end;
