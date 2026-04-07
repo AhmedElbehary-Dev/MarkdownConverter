@@ -31,10 +31,10 @@ jobs:
       - name: Install Inno Setup
         run: choco install innosetup --no-progress
 
-      - name: Build Windows Setup .exe
+      - name: Compile Inno Setup Script
         run: |
           $ver = "${{ github.ref_name }}".TrimStart('v')
-          (Get-Content .\packaging\windows\setup.iss) -replace 'AppVersion=.*', "AppVersion=$ver" | Set-Content .\packaging\windows\setup.iss
+          (Get-Content .\packaging\windows\setup.iss) -replace 'AppVersion=2.0.8', "AppVersion=$ver" | Set-Content .\packaging\windows\setup.iss
           mkdir release -ea 0
           iscc .\packaging\windows\setup.iss
 
