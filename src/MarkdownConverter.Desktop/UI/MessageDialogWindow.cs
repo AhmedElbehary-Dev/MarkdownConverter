@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using MarkdownConverter.ViewModels;
@@ -10,68 +11,114 @@ public sealed class MessageDialogWindow : Window
 {
     public MessageDialogWindow(string message, ToastKind kind)
     {
-        Width = 560;
-        MinWidth = 420;
-        Height = 260;
-        MinHeight = 220;
+        Width = 420;
+        Height = 240;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
-        CanResize = true;
-        Title = kind == ToastKind.Error ? "Error" : "Success";
+        CanResize = false;
+        SystemDecorations = SystemDecorations.None;
+        Background = Brushes.Transparent;
+        TransparencyLevelHint = new[] { WindowTransparencyLevel.Transparent };
 
-        var accent = kind == ToastKind.Error
-            ? new SolidColorBrush(Color.Parse("#B91C1C"))
-            : new SolidColorBrush(Color.Parse("#15803D"));
+        var isError = kind == ToastKind.Error;
+        var accentColor = isError ? Color.Parse("#FF453A") : Color.Parse("#30D158");
+        var accentBrush = new SolidColorBrush(accentColor);
+        var iconText = isError ? "✕" : "✓";
+        var titleText = isError ? "Error" : "Success";
 
         Content = new Border
         {
-            Padding = new Thickness(16),
+            Background = new SolidColorBrush(Color.Parse("#1C1C1E")),
+            CornerRadius = new CornerRadius(16),
+            BorderBrush = new SolidColorBrush(Color.Parse("#3A3A3C")),
+            BorderThickness = new Thickness(1),
+            Margin = new Thickness(16),
+            Padding = new Thickness(24, 24, 24, 20),
+            BoxShadow = BoxShadows.Parse("0 12 30 0 #40000000"),
             Child = new Grid
             {
-                RowDefinitions = new RowDefinitions("Auto,*,Auto"),
+                RowDefinitions = new RowDefinitions("Auto, *, Auto"),
                 Children =
                 {
-                    new TextBlock
+                    // Header
+                    new StackPanel
                     {
-                        Text = Title,
-                        FontWeight = FontWeight.SemiBold,
-                        Foreground = accent,
-                        FontSize = 18,
-                        Margin = new Thickness(0, 0, 0, 12)
+                        Orientation = Orientation.Horizontal,
+                        Margin = new Thickness(0, 0, 0, 16),
+                        Spacing = 12,
+                        Children =
+                        {
+                            new Border
+                            {
+                                Width = 36,
+                                Height = 36,
+                                CornerRadius = new CornerRadius(18),
+                                Background = new SolidColorBrush(accentColor, 0.15),
+                                Child = new TextBlock
+                                {
+                                    Text = iconText,
+                                    Foreground = accentBrush,
+                                    FontSize = 18,
+                                    FontWeight = FontWeight.Bold,
+                                    HorizontalAlignment = HorizontalAlignment.Center,
+                                    VerticalAlignment = VerticalAlignment.Center
+                                }
+                            },
+                            new TextBlock
+                            {
+                                Text = titleText,
+                                FontWeight = FontWeight.SemiBold,
+                                Foreground = Brushes.White,
+                                FontSize = 20,
+                                VerticalAlignment = VerticalAlignment.Center
+                            }
+                        }
                     },
+                    // Message
                     new ScrollViewer
                     {
                         [Grid.RowProperty] = 1,
-                        Margin = new Thickness(0, 0, 0, 12),
+                        Margin = new Thickness(0, 0, 0, 16),
                         Content = new TextBlock
                         {
                             Text = message,
-                            TextWrapping = TextWrapping.Wrap
+                            TextWrapping = TextWrapping.Wrap,
+                            Foreground = new SolidColorBrush(Color.Parse("#EBEBF5"), 0.6),
+                            FontSize = 14,
+                            LineHeight = 22
                         }
                     },
-                    new StackPanel
+                    // OK Button
+                    new Button
                     {
                         [Grid.RowProperty] = 2,
-                        Orientation = Orientation.Horizontal,
+                        Content = "OK",
                         HorizontalAlignment = HorizontalAlignment.Right,
-                        Children =
-                        {
-                            new Button
-                            {
-                                Content = "OK",
-                                MinWidth = 88
-                            }
-                        }
+                        Background = accentBrush,
+                        Foreground = Brushes.White,
+                        FontWeight = FontWeight.Medium,
+                        FontSize = 14,
+                        Padding = new Thickness(32, 8),
+                        CornerRadius = new CornerRadius(8),
+                        Cursor = new Cursor(StandardCursorType.Hand)
                     }
                 }
             }
         };
 
         if (Content is Border { Child: Grid grid } &&
-            grid.Children.Count > 2 &&
-            grid.Children[2] is StackPanel { Children.Count: > 0 } buttonPanel &&
-            buttonPanel.Children[0] is Button okButton)
+            grid.Children.Count >= 3 &&
+            grid.Children[2] is Button okButton)
         {
             okButton.Click += (_, _) => Close();
+
+            // Enable dragging the custom window
+            grid.PointerPressed += (sender, e) =>
+            {
+                if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+                {
+                    BeginMoveDrag(e);
+                }
+            };
         }
     }
 }
