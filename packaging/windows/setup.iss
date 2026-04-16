@@ -2,15 +2,24 @@
 AppId={{783eb077-d4fa-4dc4-bbf8-661cd9dc6ee8}
 AppName=MarkdownConverter
 AppVersion=2.0.9
+AppPublisher=AhmedElbehary-Dev
+AppPublisherURL=https://github.com/AhmedElbehary-Dev/MarkdownConverter
+AppSupportURL=https://github.com/AhmedElbehary-Dev/MarkdownConverter/issues
+AppUpdatesURL=https://github.com/AhmedElbehary-Dev/MarkdownConverter/releases
 DefaultDirName={autopf}\MarkdownConverter
 DefaultGroupName=MarkdownConverter
 UninstallDisplayIcon={app}\MarkdownConverter.exe
+SetupIconFile=..\..\img\md_converter.ico
 Compression=lzma2
 SolidCompression=yes
 OutputDir=..\..\release
 OutputBaseFilename=MarkdownConverter-Setup-x64
 ArchitecturesInstallIn64BitMode=x64
+PrivilegesRequired=admin
 SetupMutex=MarkdownConverterSetupMutex
+; --- Code Signing (uncomment when you have a certificate) ---
+; SignTool=signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /a $f
+; SignedUninstaller=yes
 
 [Files]
 Source: "..\..\bin\Release\net10.0\win-x64\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs

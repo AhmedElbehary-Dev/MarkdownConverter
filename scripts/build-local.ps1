@@ -69,12 +69,26 @@ Write-Host "[4/4] Building Windows installer (.exe)..." -ForegroundColor Cyan
 
 $iscc = Get-Command iscc -ErrorAction SilentlyContinue
 if ($null -eq $iscc) {
-    Write-Error "iscc (Inno Setup) not found in PATH."
+    # Check common install locations
+    $candidates = @(
+        "$env:LOCALAPPDATA\Programs\Inno Setup 6\iscc.exe",
+        "$env:ProgramFiles\Inno Setup 6\iscc.exe",
+        "${env:ProgramFiles(x86)}\Inno Setup 6\iscc.exe"
+    )
+    foreach ($c in $candidates) {
+        if (Test-Path $c) {
+            $iscc = Get-Command $c
+            break
+        }
+    }
+}
+if ($null -eq $iscc) {
+    Write-Error "iscc (Inno Setup) not found in PATH or common locations."
     Write-Error "Install from: https://jrsoftware.org/isdl.php"
     exit 1
 }
 
-iscc .\packaging\windows\setup.iss
+& $iscc.Source .\packaging\windows\setup.iss
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Inno Setup build failed!"
     exit 1
