@@ -38,8 +38,10 @@
 - **PDF** — print-ready A4 layout via HTML-to-PDF rendering
 - **Word (DOCX)** — editable documents from HTML-to-DOCX conversion
 - **Excel (XLSX)** — tables extracted into worksheets, non-table content collected in a Notes sheet
+- **Image-to-PDF** — easily combine multiple images into a single PDF document
+- **PDF Compression** — reduce PDF file sizes with customizable quality presets (integrates Ghostscript)
 - **Output controls** — choose folder, copy path, open after convert, overwrite toggle
-- **Progress & notifications** — inline progress indicator and toast alerts
+- **Progress & notifications** — inline progress indicator, custom message dialogs, and toast alerts
 
 ## Screenshots
 
@@ -95,6 +97,7 @@ Samples/                        # Sample markdown for manual validation
 | DinkToPdf | PDF export (wkhtmltopdf wrapper) |
 | OpenXml + HtmlToOpenXml | Word export |
 | ClosedXML | Excel export |
+| Ghostscript (optional) | PDF compression |
 
 ## License
 

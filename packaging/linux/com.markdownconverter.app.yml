@@ -1,9 +1,9 @@
 app-id: com.markdownconverter.app
 runtime: org.freedesktop.Platform
-runtime-version: '2.0.8'
+runtime-version: '2.0.9'
 sdk: org.freedesktop.Sdk
 base: org.freedesktop.Platform.BaseApp
-base-version: '2.0.8'
+base-version: '2.0.9'
 command: markdownconverter
 separate-locales: false
 
