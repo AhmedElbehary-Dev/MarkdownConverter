@@ -37,7 +37,7 @@ namespace MarkdownConverter.Desktop.UI
                             using var stream = System.IO.File.OpenRead(item.FilePath);
                             item.UiThumbnail = Bitmap.DecodeToWidth(stream, 300);
                         }
-                        catch (Exception ex)
+                        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
                         {
                             System.Diagnostics.Debug.WriteLine($"Failed to load thumbnail: {ex.Message}");
                         }

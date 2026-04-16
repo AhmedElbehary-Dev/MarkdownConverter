@@ -138,14 +138,11 @@ public partial class MainWindow : Window
         var storageItems = e.Data.GetFiles();
         if (storageItems != null)
         {
-            foreach (var item in storageItems)
+            var path = storageItems.Select(GetLocalPath).FirstOrDefault(p => !string.IsNullOrWhiteSpace(p));
+            if (path != null)
             {
-                var path = GetLocalPath(item);
-                if (!string.IsNullOrWhiteSpace(path))
-                {
-                    filePath = path;
-                    return true;
-                }
+                filePath = path;
+                return true;
             }
         }
 

@@ -85,9 +85,8 @@ namespace MarkdownConverter.ViewModels
             var files = await _platformServices.PickImageFilesAsync();
             if (files != null && files.Length > 0)
             {
-                foreach (var file in files)
+                foreach (var vm in files.Select(file => new ImageItemViewModel(file)))
                 {
-                    var vm = new ImageItemViewModel(file);
                     HookItemPropertyChanged(vm);
                     Images.Add(vm);
                 }
@@ -162,14 +161,9 @@ namespace MarkdownConverter.ViewModels
             try
             {
                 var initialName = Images.FirstOrDefault()?.FileName;
-                if (!string.IsNullOrEmpty(initialName))
-                {
-                    initialName = Path.GetFileNameWithoutExtension(initialName) + "_combined";
-                }
-                else
-                {
-                    initialName = "combined";
-                }
+                initialName = !string.IsNullOrEmpty(initialName) 
+                    ? Path.GetFileNameWithoutExtension(initialName) + "_combined" 
+                    : "combined";
 
                 var outputPath = await _platformServices.SavePdfFileAsync(initialName);
                 if (string.IsNullOrEmpty(outputPath)) return; // Canceled

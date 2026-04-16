@@ -152,8 +152,6 @@ public class PdfCompressorViewModel : ViewModelBase
         {
             await RunCompressionAsync(InputFilePath);
 
-            // Update the original size display since the file was replaced
-            var newSize = new FileInfo(InputFilePath).Length;
             StatusText += $" Backup saved as: {Path.GetFileName(backupPath)}";
         }
         catch

@@ -61,7 +61,7 @@ public sealed class PdfCompressorService
         // and ensures a clean atomic write.
         var tempOutputPath = Path.Combine(
             Path.GetTempPath(),
-            $"mdc_compressed_{Guid.NewGuid():N}.pdf");
+            "mdc_compressed_" + Guid.NewGuid().ToString("N") + ".pdf");
 
         try
         {
@@ -80,7 +80,7 @@ public sealed class PdfCompressorService
                 MoveToFinalDestination(tempOutputPath, outputPath);
                 return outputPath;
             }
-            catch (Exception renderEx)
+            catch (Exception renderEx) when (renderEx is not OperationCanceledException)
             {
                 throw new InvalidOperationException(
                     $"PDF compression failed.\n\n" +
@@ -221,7 +221,7 @@ public sealed class PdfCompressorService
                 // Write BGRA pixels as a temporary BMP file
                 string tempPath = Path.Combine(
                     Path.GetTempPath(),
-                    $"mdc_compress_{Guid.NewGuid():N}.bmp");
+                    "mdc_compress_" + Guid.NewGuid().ToString("N") + ".bmp");
                 WriteBmpFile(bgraBytes, width, height, tempPath);
                 tempFiles.Add(tempPath);
 
