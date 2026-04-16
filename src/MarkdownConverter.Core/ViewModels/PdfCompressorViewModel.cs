@@ -94,6 +94,7 @@ public class PdfCompressorViewModel : ViewModelBase
 
     public AsyncRelayCommand BrowsePdfCommand { get; }
     public AsyncRelayCommand CompressCommand { get; }
+    public AsyncRelayCommand ReplaceOriginalCommand { get; }
 
     public PdfCompressorViewModel(PdfCompressorService compressorService, IUiPlatformServices platformServices)
     {
@@ -101,7 +102,8 @@ public class PdfCompressorViewModel : ViewModelBase
         _platformServices = platformServices;
 
         BrowsePdfCommand = new AsyncRelayCommand(BrowsePdfAsync, () => !IsCompressing);
-        CompressCommand = new AsyncRelayCommand(CompressAsync, () => !IsCompressing && HasFile);
+        CompressCommand = new AsyncRelayCommand(CompressSaveAsAsync, () => !IsCompressing && HasFile);
+        ReplaceOriginalCommand = new AsyncRelayCommand(ReplaceOriginalAsync, () => !IsCompressing && HasFile);
     }
 
     private async Task BrowsePdfAsync()
@@ -119,19 +121,55 @@ public class PdfCompressorViewModel : ViewModelBase
         StatusText = $"Loaded: {Path.GetFileName(result)} ({OriginalSizeText})";
     }
 
-    private async Task CompressAsync()
+    private async Task CompressSaveAsAsync()
     {
         if (!File.Exists(InputFilePath)) return;
 
-        var quality = (CompressionQuality)SelectedQualityIndex;
-
-        // Suggest an output filename
-        var dir = Path.GetDirectoryName(InputFilePath) ?? string.Empty;
         var nameWithoutExt = Path.GetFileNameWithoutExtension(InputFilePath);
         var suggestedName = $"{nameWithoutExt}_compressed";
 
         var outputPath = await _platformServices.SavePdfFileAsync(suggestedName);
         if (string.IsNullOrEmpty(outputPath)) return;
+
+        await RunCompressionAsync(outputPath);
+    }
+
+    private async Task ReplaceOriginalAsync()
+    {
+        if (!File.Exists(InputFilePath)) return;
+
+        var confirm = await _platformServices.ShowConfirmAsync(
+            "Replace Original",
+            $"This will overwrite the original file:\n{Path.GetFileName(InputFilePath)}\n\nA backup will be created before replacing. Continue?");
+
+        if (!confirm) return;
+
+        // Create a backup copy before replacing
+        var backupPath = InputFilePath + ".bak";
+        File.Copy(InputFilePath, backupPath, overwrite: true);
+
+        try
+        {
+            await RunCompressionAsync(InputFilePath);
+
+            // Update the original size display since the file was replaced
+            var newSize = new FileInfo(InputFilePath).Length;
+            StatusText += $" Backup saved as: {Path.GetFileName(backupPath)}";
+        }
+        catch
+        {
+            // Restore from backup if compression failed
+            if (File.Exists(backupPath) && !File.Exists(InputFilePath))
+            {
+                File.Move(backupPath, InputFilePath);
+            }
+            throw;
+        }
+    }
+
+    private async Task RunCompressionAsync(string outputPath)
+    {
+        var quality = (CompressionQuality)SelectedQualityIndex;
 
         IsCompressing = true;
         HasResult = false;

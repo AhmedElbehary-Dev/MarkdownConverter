@@ -56,30 +56,55 @@ public sealed class PdfCompressorService
         if (!File.Exists(inputPath))
             throw new FileNotFoundException("Input PDF not found.", inputPath);
 
-        // Try Ghostscript first – it gives the best compression while preserving text
-        var gsException = await TryGhostscriptAsync(inputPath, outputPath, quality, cancellationToken);
-        if (gsException == null)
-        {
-            return outputPath;
-        }
+        // Always compress to a temp file first, then move to the final destination.
+        // This avoids file-locking issues when output == input (in-place replacement)
+        // and ensures a clean atomic write.
+        var tempOutputPath = Path.Combine(
+            Path.GetTempPath(),
+            $"mdc_compressed_{Guid.NewGuid():N}.pdf");
 
-        // Fallback: Render every page to an image at target DPI, then rebuild the PDF.
-        // This is the same technique Ghostscript uses internally — it rasterizes and
-        // re-encodes images with compression. Very effective for image-heavy PDFs.
         try
         {
-            await Task.Run(() => CompressWithRenderAndRebuild(inputPath, outputPath, quality), cancellationToken);
-            return outputPath;
+            // Try Ghostscript first – it gives the best compression while preserving text
+            var gsException = await TryGhostscriptAsync(inputPath, tempOutputPath, quality, cancellationToken);
+            if (gsException == null)
+            {
+                MoveToFinalDestination(tempOutputPath, outputPath);
+                return outputPath;
+            }
+
+            // Fallback: Render every page to an image at target DPI, then rebuild the PDF.
+            try
+            {
+                await Task.Run(() => CompressWithRenderAndRebuild(inputPath, tempOutputPath, quality), cancellationToken);
+                MoveToFinalDestination(tempOutputPath, outputPath);
+                return outputPath;
+            }
+            catch (Exception renderEx)
+            {
+                throw new InvalidOperationException(
+                    $"PDF compression failed.\n\n" +
+                    $"Ghostscript: {gsException.Message}\n\n" +
+                    $"Render fallback: {renderEx.Message}\n\n" +
+                    $"For best results (preserving text), install Ghostscript and ensure 'gs' or 'gswin64c' is on PATH.",
+                    renderEx);
+            }
         }
-        catch (Exception renderEx)
+        finally
         {
-            throw new InvalidOperationException(
-                $"PDF compression failed.\n\n" +
-                $"Ghostscript: {gsException.Message}\n\n" +
-                $"Render fallback: {renderEx.Message}\n\n" +
-                $"For best results (preserving text), install Ghostscript and ensure 'gs' or 'gswin64c' is on PATH.",
-                renderEx);
+            TryDeleteFile(tempOutputPath);
         }
+    }
+
+    /// <summary>
+    /// Moves the temp file to the final destination, overwriting any existing file.
+    /// </summary>
+    private static void MoveToFinalDestination(string tempPath, string finalPath)
+    {
+        if (File.Exists(finalPath))
+            File.Delete(finalPath);
+
+        File.Move(tempPath, finalPath);
     }
 
     /// <summary>
