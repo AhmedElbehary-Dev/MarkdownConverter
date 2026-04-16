@@ -96,5 +96,11 @@ namespace MarkdownConverter.Desktop.UI
             var window = new ImageToPdfWindow();
             window.Show(this);
         }
+
+        private void Compressor_Click(object? sender, RoutedEventArgs e)
+        {
+            var window = new PdfCompressorWindow();
+            window.Show(this);
+        }
     }
 }
