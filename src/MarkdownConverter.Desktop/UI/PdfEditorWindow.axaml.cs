@@ -90,5 +90,11 @@ namespace MarkdownConverter.Desktop.UI
             var overlay = this.FindControl<Grid>("OverlayGrid");
             if (overlay != null) overlay.IsVisible = false;
         }
+
+        private void CombineImages_Click(object? sender, RoutedEventArgs e)
+        {
+            var window = new ImageToPdfWindow();
+            window.Show(this);
+        }
     }
 }

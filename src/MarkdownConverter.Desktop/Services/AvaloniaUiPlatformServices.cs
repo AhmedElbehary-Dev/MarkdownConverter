@@ -77,6 +77,59 @@ public sealed class AvaloniaUiPlatformServices : IUiPlatformServices
         return ToLocalPath(files.FirstOrDefault());
     }
 
+    public async Task<string[]?> PickImageFilesAsync()
+    {
+        var owner = _getOwner();
+        if (owner?.StorageProvider is null)
+        {
+            return null;
+        }
+
+        var files = await owner.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Select Image Files",
+            AllowMultiple = true,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("Image Files")
+                {
+                    Patterns = ["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.gif", "*.tiff", "*.tif"]
+                },
+                new FilePickerFileType("All Files")
+                {
+                    Patterns = ["*"]
+                }
+            ]
+        });
+
+        return files.Select(ToLocalPath).Where(p => p != null).Cast<string>().ToArray();
+    }
+
+    public async Task<string?> SavePdfFileAsync(string suggestedName)
+    {
+        var owner = _getOwner();
+        if (owner?.StorageProvider is null)
+        {
+            return null;
+        }
+
+        var file = await owner.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = "Save PDF",
+            SuggestedFileName = suggestedName,
+            DefaultExtension = ".pdf",
+            FileTypeChoices =
+            [
+                new FilePickerFileType("PDF Files")
+                {
+                    Patterns = ["*.pdf"]
+                }
+            ]
+        });
+
+        return ToLocalPath(file);
+    }
+
     public async Task<string?> PickOutputFolderAsync(string? initialPath)
     {
         var owner = _getOwner();

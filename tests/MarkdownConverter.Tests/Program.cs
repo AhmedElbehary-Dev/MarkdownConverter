@@ -309,6 +309,10 @@ internal static class Program
         public Task<string?> PickMarkdownFileAsync() => Task.FromResult(NextMarkdownPath);
 
         public Task<string?> PickPdfFileAsync() => Task.FromResult<string?>(null);
+        
+        public Task<string[]?> PickImageFilesAsync() => Task.FromResult<string[]?>(null);
+        
+        public Task<string?> SavePdfFileAsync(string suggestedName) => Task.FromResult<string?>(null);
 
         public Task<string?> PickOutputFolderAsync(string? initialPath) => Task.FromResult(NextOutputFolder);
 

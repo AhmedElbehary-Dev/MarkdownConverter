@@ -8,6 +8,8 @@ public interface IUiPlatformServices
 {
     Task<string?> PickMarkdownFileAsync();
     Task<string?> PickPdfFileAsync();
+    Task<string[]?> PickImageFilesAsync();
+    Task<string?> SavePdfFileAsync(string suggestedName);
     Task<string?> PickOutputFolderAsync(string? initialPath);
     void OpenPathWithShell(string path);
     void SetClipboardText(string text);
