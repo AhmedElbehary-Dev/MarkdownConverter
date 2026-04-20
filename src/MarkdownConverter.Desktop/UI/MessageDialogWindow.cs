@@ -25,6 +25,53 @@ public sealed class MessageDialogWindow : Window
         var iconText = isError ? "✕" : "✓";
         var titleText = isError ? "Error" : "Success";
 
+        var okButton = new Button
+        {
+            Content = "OK",
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Background = accentBrush,
+            Foreground = Brushes.White,
+            FontWeight = FontWeight.Medium,
+            FontSize = 14,
+            Padding = new Thickness(32, 8),
+            CornerRadius = new CornerRadius(8),
+            Cursor = new Cursor(StandardCursorType.Hand)
+        };
+        okButton.Click += (_, _) => Close();
+
+        var copyButton = new Button
+        {
+            Content = "📋 Copy",
+            Background = new SolidColorBrush(Color.Parse("#3A3A3C")),
+            Foreground = Brushes.White,
+            FontWeight = FontWeight.Medium,
+            FontSize = 14,
+            Padding = new Thickness(16, 8),
+            CornerRadius = new CornerRadius(8),
+            Cursor = new Cursor(StandardCursorType.Hand),
+            HorizontalAlignment = HorizontalAlignment.Left
+        };
+        copyButton.Click += async (_, _) => 
+        {
+            if (TopLevel.GetTopLevel(this)?.Clipboard is { } clipboard)
+            {
+                await clipboard.SetTextAsync(message);
+                var originalContent = copyButton.Content;
+                copyButton.Content = "✓ Copied";
+                await System.Threading.Tasks.Task.Delay(2000);
+                copyButton.Content = originalContent;
+            }
+        };
+
+        var messageText = new SelectableTextBlock
+        {
+            Text = message,
+            TextWrapping = TextWrapping.Wrap,
+            Foreground = new SolidColorBrush(Color.Parse("#EBEBF5"), 0.6),
+            FontSize = 14,
+            LineHeight = 22
+        };
+
         Content = new Border
         {
             Background = new SolidColorBrush(Color.Parse("#1C1C1E")),
@@ -78,39 +125,24 @@ public sealed class MessageDialogWindow : Window
                     {
                         [Grid.RowProperty] = 1,
                         Margin = new Thickness(0, 0, 0, 16),
-                        Content = new TextBlock
-                        {
-                            Text = message,
-                            TextWrapping = TextWrapping.Wrap,
-                            Foreground = new SolidColorBrush(Color.Parse("#EBEBF5"), 0.6),
-                            FontSize = 14,
-                            LineHeight = 22
-                        }
+                        Content = messageText
                     },
-                    // OK Button
-                    new Button
+                    // Buttons
+                    new Grid
                     {
                         [Grid.RowProperty] = 2,
-                        Content = "OK",
-                        HorizontalAlignment = HorizontalAlignment.Right,
-                        Background = accentBrush,
-                        Foreground = Brushes.White,
-                        FontWeight = FontWeight.Medium,
-                        FontSize = 14,
-                        Padding = new Thickness(32, 8),
-                        CornerRadius = new CornerRadius(8),
-                        Cursor = new Cursor(StandardCursorType.Hand)
+                        Children =
+                        {
+                            copyButton,
+                            okButton
+                        }
                     }
                 }
             }
         };
 
-        if (Content is Border { Child: Grid grid } &&
-            grid.Children.Count >= 3 &&
-            grid.Children[2] is Button okButton)
+        if (Content is Border { Child: Grid grid })
         {
-            okButton.Click += (_, _) => Close();
-
             // Enable dragging the custom window
             grid.PointerPressed += (sender, e) =>
             {
