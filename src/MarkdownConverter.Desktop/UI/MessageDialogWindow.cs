@@ -49,7 +49,8 @@ public sealed class MessageDialogWindow : Window
             Padding = new Thickness(16, 8),
             CornerRadius = new CornerRadius(8),
             Cursor = new Cursor(StandardCursorType.Hand),
-            HorizontalAlignment = HorizontalAlignment.Left
+            HorizontalAlignment = HorizontalAlignment.Left,
+            IsVisible = isError
         };
         copyButton.Click += async (_, _) => 
         {
