@@ -39,19 +39,18 @@ var
   LogMemo: TNewMemo;
   PathsAddedToSystem: String;
 
-function GetDateTimeString(const DateTimeFormat: String; const DateSeparator, TimeSeparator: Char): String;
-begin
-  Result := GetDateTimeString(DateTimeFormat, DateSeparator, TimeSeparator);
-end;
-
 procedure LogLine(Msg: String);
 var
   S: String;
 begin
   S := '[' + GetDateTimeString('hh:nn:ss', ':', ':') + '] ' + Msg;
-  LogMemo.Lines.Add(S);
-  LogMemo.SelStart := Length(LogMemo.Text);
-  LogMemo.SelLength := 0;
+  if LogMemo <> nil then
+  begin
+    LogMemo.Lines.Add(S);
+    LogMemo.SelStart := Length(LogMemo.Text);
+    LogMemo.SelLength := 0;
+  end;
+  Log(S);
 end;
 
 function IsOnSystemPath(Dir: String): Boolean;
@@ -93,8 +92,8 @@ begin
   SetArrayLength(Paths, 4);
   Paths[0] := ExpandConstant('{pf}\Google\Chrome\Application\chrome.exe');
   Paths[1] := ExpandConstant('{pf32}\Google\Chrome\Application\chrome.exe');
-  Paths[2] := ExpandConstant('{pf32}\Microsoft\Edge\Application\msedge.exe');
-  Paths[3] := ExpandConstant('{pf}\Microsoft\Edge\Application\msedge.exe');
+  Paths[2] := ExpandConstant('{pf}\Microsoft\Edge\Application\msedge.exe');
+  Paths[3] := ExpandConstant('{pf32}\Microsoft\Edge\Application\msedge.exe');
   
   Result := '';
   for I := 0 to 3 do
@@ -134,68 +133,107 @@ var
   WkhtmltopdfInstalledByUs: Integer;
 begin
   DependencyPage.Show;
-  PathsAddedToSystem := '';
-  WkhtmltopdfInstalledByUs := 0;
-  
-  DependencyPage.SetProgress(10, 100);
-  LogLine(#x2713 + ' libwkhtmltox.dll installed to runtimes directory');
-  
-  BrowserPath := DetectBrowser();
-  DependencyPage.SetProgress(30, 100);
-  if BrowserPath <> '' then
-  begin
-    LogLine(#x2713 + ' Found browser: ' + BrowserPath);
-    BrowserDir := ExtractFilePath(BrowserPath);
-    if Length(BrowserDir) > 0 then
-      BrowserDir := Copy(BrowserDir, 1, Length(BrowserDir) - 1);
-    if not IsOnSystemPath(BrowserDir) then
+  try
+    { Create the LogMemo AFTER Show so dimensions are valid }
+    LogMemo := TNewMemo.Create(WizardForm);
+    LogMemo.Parent := DependencyPage.Surface;
+    LogMemo.Left := 0;
+    LogMemo.Top := DependencyPage.ProgressBar.Top + DependencyPage.ProgressBar.Height + 12;
+    LogMemo.Width := DependencyPage.SurfaceWidth;
+    LogMemo.Height := DependencyPage.SurfaceHeight - LogMemo.Top;
+    LogMemo.ReadOnly := True;
+    LogMemo.ScrollBars := ssVertical;
+    LogMemo.Font.Name := 'Consolas';
+    LogMemo.Font.Size := 9;
+
+    PathsAddedToSystem := '';
+    WkhtmltopdfInstalledByUs := 0;
+
+    { Step 1: DLL already copied by [Files] }
+    DependencyPage.SetProgress(10, 100);
+    DependencyPage.SetText('Verifying libwkhtmltox.dll...', '');
+    Sleep(300);
+    LogLine('[OK] libwkhtmltox.dll installed to runtimes directory');
+
+    { Step 2: Detect browser }
+    DependencyPage.SetProgress(25, 100);
+    DependencyPage.SetText('Detecting installed browsers...', '');
+    Sleep(300);
+    BrowserPath := DetectBrowser();
+    if BrowserPath <> '' then
     begin
-      AddToSystemPath(BrowserDir);
-      LogLine(#x2713 + ' Browser directory added to system PATH');
-    end;
-  end else
-  begin
-    LogLine('Browser not found in common locations.');
-  end;
-  
-  DependencyPage.SetProgress(50, 100);
-  WkhtmltopdfBin := ExpandConstant('{pf}\wkhtmltopdf\bin');
-  if not FileExists(WkhtmltopdfBin + '\wkhtmltopdf.exe') then
-  begin
-    LogLine('Installing wkhtmltopdf silently...');
-    if Exec(ExpandConstant('{tmp}\wkhtmltox-installer.exe'), '/S', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
-    begin
-      LogLine(#x2713 + ' wkhtmltopdf installed successfully');
-      WkhtmltopdfInstalledByUs := 1;
+      LogLine('[OK] Found browser: ' + BrowserPath);
+      BrowserDir := ExtractFilePath(BrowserPath);
+      if Length(BrowserDir) > 0 then
+        BrowserDir := Copy(BrowserDir, 1, Length(BrowserDir) - 1);
+      if not IsOnSystemPath(BrowserDir) then
+      begin
+        AddToSystemPath(BrowserDir);
+        LogLine('[OK] Browser directory added to system PATH');
+      end else
+        LogLine('[OK] Browser already on system PATH');
     end else
     begin
-      LogLine('Failed to install wkhtmltopdf (Code: ' + IntToStr(ResultCode) + ')');
+      LogLine('[--] No Chrome/Edge found (PDF via browser will be unavailable)');
     end;
-  end else
-  begin
-    LogLine(#x2713 + ' wkhtmltopdf already present - skipping installation');
-  end;
-  
-  DependencyPage.SetProgress(80, 100);
-  if FileExists(WkhtmltopdfBin + '\wkhtmltopdf.exe') then
-  begin
-    if not IsOnSystemPath(WkhtmltopdfBin) then
+
+    { Step 3: Install wkhtmltopdf }
+    DependencyPage.SetProgress(45, 100);
+    DependencyPage.SetText('Checking wkhtmltopdf...', '');
+    Sleep(300);
+    WkhtmltopdfBin := ExpandConstant('{pf}\wkhtmltopdf\bin');
+    if not FileExists(WkhtmltopdfBin + '\wkhtmltopdf.exe') then
     begin
-      AddToSystemPath(WkhtmltopdfBin);
-      LogLine(#x2713 + ' wkhtmltopdf added to system PATH');
+      LogLine('[..] Installing wkhtmltopdf silently...');
+      DependencyPage.SetText('Installing wkhtmltopdf (this may take a moment)...', '');
+      if Exec(ExpandConstant('{tmp}\wkhtmltox-installer.exe'), '/VERYSILENT /NORESTART /SUPPRESSMSGBOXES', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+      begin
+        LogLine('[OK] wkhtmltopdf installed successfully');
+        WkhtmltopdfInstalledByUs := 1;
+      end else
+      begin
+        LogLine('[!!] wkhtmltopdf install returned code ' + IntToStr(ResultCode));
+      end;
+    end else
+    begin
+      LogLine('[OK] wkhtmltopdf already present - skipping');
     end;
+
+    { Step 4: PATH for wkhtmltopdf }
+    DependencyPage.SetProgress(75, 100);
+    DependencyPage.SetText('Configuring system PATH...', '');
+    Sleep(300);
+    if FileExists(WkhtmltopdfBin + '\wkhtmltopdf.exe') then
+    begin
+      if not IsOnSystemPath(WkhtmltopdfBin) then
+      begin
+        AddToSystemPath(WkhtmltopdfBin);
+        LogLine('[OK] wkhtmltopdf added to system PATH');
+      end else
+        LogLine('[OK] wkhtmltopdf already on system PATH');
+    end;
+
+    { Step 5: Write manifest }
+    DependencyPage.SetProgress(90, 100);
+    DependencyPage.SetText('Writing install manifest...', '');
+    Sleep(200);
+    LogLine('[..] Writing install manifest...');
+    RegWriteDWordValue(HKLM, 'Software\MarkdownConverterTeam\MarkdownConverter\InstallManifest', 'WkhtmltopdfInstalled', WkhtmltopdfInstalledByUs);
+    if WkhtmltopdfInstalledByUs = 1 then
+      RegWriteStringValue(HKLM, 'Software\MarkdownConverterTeam\MarkdownConverter\InstallManifest', 'WkhtmltopdfUninstallCmd', ExpandConstant('{pf}\wkhtmltopdf\unins000.exe'));
+    RegWriteStringValue(HKLM, 'Software\MarkdownConverterTeam\MarkdownConverter\InstallManifest', 'PathEntriesAdded', PathsAddedToSystem);
+    RegWriteStringValue(HKLM, 'Software\MarkdownConverterTeam\MarkdownConverter\InstallManifest', 'InstallDate', GetDateTimeString('yyyy-mm-dd hh:nn:ss', '-', ':'));
+    LogLine('[OK] Manifest saved');
+
+    { Done }
+    DependencyPage.SetProgress(100, 100);
+    DependencyPage.SetText('Environment setup complete!', '');
+    LogLine('------------------------------');
+    LogLine('[OK] All PDF backends ready!');
+    Sleep(1500);
+  finally
+    DependencyPage.Hide;
   end;
-  
-  LogLine('Writing install manifest...');
-  RegWriteDWordValue(HKLM, 'Software\MarkdownConverterTeam\MarkdownConverter\InstallManifest', 'WkhtmltopdfInstalled', WkhtmltopdfInstalledByUs);
-  if WkhtmltopdfInstalledByUs = 1 then
-    RegWriteStringValue(HKLM, 'Software\MarkdownConverterTeam\MarkdownConverter\InstallManifest', 'WkhtmltopdfUninstallCmd', ExpandConstant('{pf}\wkhtmltopdf\unins000.exe'));
-  RegWriteStringValue(HKLM, 'Software\MarkdownConverterTeam\MarkdownConverter\InstallManifest', 'PathEntriesAdded', PathsAddedToSystem);
-  RegWriteStringValue(HKLM, 'Software\MarkdownConverterTeam\MarkdownConverter\InstallManifest', 'InstallDate', GetDateTimeString('yyyy-mm-dd hh:nn:ss', '-', ':'));
-  
-  DependencyPage.SetProgress(100, 100);
-  LogLine('------------------------------');
-  LogLine(#x2713 + ' All PDF backends ready');
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
@@ -226,15 +264,6 @@ end;
 procedure InitializeWizard;
 begin
   DependencyPage := CreateOutputProgressPage('Environment Setup', 'Setting up PDF conversion components...');
-  LogMemo := TNewMemo.Create(WizardForm);
-  LogMemo.Parent := DependencyPage.Surface;
-  LogMemo.Left := 0;
-  LogMemo.Top := DependencyPage.ProgressBar.Top + DependencyPage.ProgressBar.Height + 10;
-  LogMemo.Width := DependencyPage.SurfaceWidth;
-  LogMemo.Height := DependencyPage.SurfaceHeight - LogMemo.Top;
-  LogMemo.ReadOnly := True;
-  LogMemo.ScrollBars := ssVertical;
-  LogMemo.Color := clWindow;
 end;
 
 procedure CurUninstallStepChanged(CurStep: TUninstallStep);
@@ -245,15 +274,17 @@ var
 begin
   if CurStep = usPostUninstall then
   begin
+    { Uninstall wkhtmltopdf only if WE installed it }
     if RegQueryDWordValue(HKLM, 'Software\MarkdownConverterTeam\MarkdownConverter\InstallManifest', 'WkhtmltopdfInstalled', WkhtmltopdfInstalled) then
     begin
       if (WkhtmltopdfInstalled = 1) and RegQueryStringValue(HKLM, 'Software\MarkdownConverterTeam\MarkdownConverter\InstallManifest', 'WkhtmltopdfUninstallCmd', WkhtmltopdfUninstallCmd) then
       begin
         if FileExists(WkhtmltopdfUninstallCmd) then
-          Exec(WkhtmltopdfUninstallCmd, '/S', '', SW_HIDE, ewWaitUntilTerminated, iResultCode);
+          Exec(WkhtmltopdfUninstallCmd, '/VERYSILENT /NORESTART /SUPPRESSMSGBOXES', '', SW_HIDE, ewWaitUntilTerminated, iResultCode);
       end;
     end;
     
+    { Remove PATH entries we added }
     if RegQueryStringValue(HKLM, 'Software\MarkdownConverterTeam\MarkdownConverter\InstallManifest', 'PathEntriesAdded', PathsAdded) then
     begin
       while Length(PathsAdded) > 0 do
@@ -272,9 +303,11 @@ begin
       end;
     end;
     
+    { Clean registry }
     RegDeleteKeyIncludingSubkeys(HKLM, 'Software\MarkdownConverterTeam\MarkdownConverter');
     RegDeleteKeyIncludingSubkeys(HKCU, 'Software\MarkdownConverterTeam');
     
+    { Clean files and shortcuts }
     DelTree(ExpandConstant('{app}'), True, True, True);
     DelTree(ExpandConstant('{group}'), True, True, False);
   end;
