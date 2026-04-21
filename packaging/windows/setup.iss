@@ -252,7 +252,14 @@ begin
     if sUnInstallString <> '' then
     begin
       sUnInstallString := RemoveQuotes(sUnInstallString);
-      Exec(sUnInstallString, '/SILENT /NORESTART /SUPPRESSMSGBOXES', '', SW_HIDE, ewWaitUntilTerminated, iResultCode);
+      if FileExists(sUnInstallString) then
+      begin
+        Exec(sUnInstallString, '/SILENT /NORESTART /SUPPRESSMSGBOXES', '', SW_HIDE, ewWaitUntilTerminated, iResultCode);
+      end
+      else
+      begin
+        Log('Old uninstaller not found at: ' + sUnInstallString + '. Proceeding with installation anyway.');
+      end;
     end;
   end
   else if (CurStep = ssPostInstall) then
