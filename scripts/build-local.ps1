@@ -59,6 +59,14 @@ if (-not (Test-Path $publishExe)) {
 $fileVer = (Get-Item $publishExe).VersionInfo.ProductVersion
 Write-Host "   Built binary version: $fileVer" -ForegroundColor Gray
 
+# --- Download dependencies (before Inno Setup) ---
+Write-Host "[3.5/4] Downloading PDF dependencies..." -ForegroundColor Cyan
+& .\packaging\windows\download-deps.ps1
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Dependency download failed! Check your internet connection."
+    exit 1
+}
+
 # --- Inno Setup .exe -------------------------------------------------------
 Write-Host "[4/4] Building Windows installer (.exe)..." -ForegroundColor Cyan
 

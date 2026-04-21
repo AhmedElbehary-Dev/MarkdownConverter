@@ -25,6 +25,10 @@ jobs:
       - name: Install Inno Setup
         run: choco install innosetup --no-progress
 
+      - name: Download PDF dependencies
+        shell: pwsh
+        run: .\packaging\windows\download-deps.ps1
+
       - name: Compile Inno Setup Script
         run: |
           $ver = "${{ github.ref_name }}".TrimStart('v')
