@@ -20,18 +20,18 @@ if (($msixVersion -split '\.').Count -eq 3) {
 
 Write-Host "Building MSIX package for version $msixVersion..." -ForegroundColor Cyan
 
-$publishDir = "..\..\bin\Release\net10.0\win-x64\publish"
-$msixStagingDir = "..\..\build-msix\AppX"
-$outputDir = "..\..\release"
+$publishDir = "$PSScriptRoot\..\..\bin\Release\net10.0\win-x64\publish"
+$msixStagingDir = "$PSScriptRoot\..\..\build-msix\AppX"
+$outputDir = "$PSScriptRoot\..\..\release"
 
 if (-not (Test-Path $publishDir)) {
-    Write-Error "Publish directory not found. Run build-local.ps1 first to publish the app."
+    Write-Error "Publish directory not found at $publishDir. Run build-local.ps1 first to publish the app."
     exit 1
 }
 
 # Clean staging directory
-if (Test-Path "..\..\build-msix") {
-    Remove-Item "..\..\build-msix\*" -Recurse -Force
+if (Test-Path "$PSScriptRoot\..\..\build-msix") {
+    Remove-Item "$PSScriptRoot\..\..\build-msix\*" -Recurse -Force
 }
 New-Item -ItemType Directory -Path "$msixStagingDir\Assets" -Force | Out-Null
 New-Item -ItemType Directory -Path $outputDir -Force -ErrorAction SilentlyContinue | Out-Null
@@ -41,13 +41,13 @@ Copy-Item "$publishDir\*" $msixStagingDir -Recurse -Force
 
 # Copy AppxManifest and inject version
 Write-Host "Configuring AppxManifest.xml..."
-$manifestContent = Get-Content ".\AppxManifest.xml"
+$manifestContent = Get-Content "$PSScriptRoot\AppxManifest.xml"
 $manifestContent = $manifestContent -replace 'Version="[^"]+"', "Version=`"$msixVersion`""
 $manifestContent | Set-Content "$msixStagingDir\AppxManifest.xml"
 
 # Handle Assets
 Write-Host "Setting up assets..."
-$iconSource = "..\..\src\MarkdownConverter.Desktop\Assets\md_converter.png"
+$iconSource = "$PSScriptRoot\..\..\src\MarkdownConverter.Desktop\Assets\md_converter.png"
 if (Test-Path $iconSource) {
     # In a real build pipeline, you'd use a tool to generate all the required sizes.
     # For now, we copy the single png to all required names to satisfy makeappx.
@@ -90,4 +90,4 @@ if ($LASTEXITCODE -eq 0) {
 }
 
 # Cleanup
-Remove-Item "..\..\build-msix" -Recurse -Force
+Remove-Item "$PSScriptRoot\..\..\build-msix" -Recurse -Force
