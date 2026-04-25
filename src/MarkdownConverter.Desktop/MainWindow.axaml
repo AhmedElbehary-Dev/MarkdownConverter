@@ -12,7 +12,8 @@
         MinHeight="620"
         Title="Markdown Converter Pro"
         Icon="avares://MarkdownConverter.Desktop/Assets/md_converter.ico"
-        Background="{DynamicResource AppBgBrush}">
+        Background="{DynamicResource AppBgBrush}"
+        WindowStartupLocation="CenterScreen">
   <Window.Resources>
     <conv:BooleanNegationConverter x:Key="BoolNot" />
     <conv:StatusKindToBrushConverter x:Key="StatusBrush" />

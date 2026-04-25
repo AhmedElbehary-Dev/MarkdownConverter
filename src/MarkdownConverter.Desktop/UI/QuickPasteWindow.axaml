@@ -12,7 +12,8 @@
         MinHeight="600"
         Title="Quick Paste - Markdown Converter Pro"
         Icon="avares://MarkdownConverter.Desktop/Assets/md_converter.ico"
-        Background="{DynamicResource AppBgBrush}">
+        Background="{DynamicResource AppBgBrush}"
+        WindowStartupLocation="CenterOwner">
   <Window.Resources>
     <conv:BooleanNegationConverter x:Key="BoolNot" />
     <conv:StatusKindToBrushConverter x:Key="StatusBrush" />

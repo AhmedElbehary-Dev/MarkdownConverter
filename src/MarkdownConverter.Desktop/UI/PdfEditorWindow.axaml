@@ -11,7 +11,8 @@
         MinHeight="600"
         Title="PDF Editor - Markdown Converter Pro"
         Icon="avares://MarkdownConverter.Desktop/Assets/md_converter.ico"
-        Background="{DynamicResource AppBgBrush}">
+        Background="{DynamicResource AppBgBrush}"
+        WindowStartupLocation="CenterOwner">
   
   <Window.Styles>
     <Style Selector="TextBlock">
