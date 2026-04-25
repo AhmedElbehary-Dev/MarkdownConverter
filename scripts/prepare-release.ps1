@@ -18,7 +18,7 @@ if ([string]::IsNullOrWhiteSpace($Version)) {
         }
         $Version = "v$major.$minor.$patch"
     } else {
-        $Version = "v2.0.8"
+        $Version = "v2.1.0"
     }
 }
 

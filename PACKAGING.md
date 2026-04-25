@@ -19,17 +19,17 @@ That's it. One file: `release\MarkdownConverter-Setup-x64.exe`
 # Build all Linux packages
 cd packaging/linux
 chmod +x build-all-linux.sh
-./build-all-linux.sh v2.0.9
+./build-all-linux.sh v2.1.0
 
 # Build specific packages only
-./build-all-linux.sh v2.0.9 --skip-flatpak --skip-snap
+./build-all-linux.sh v2.1.0 --skip-flatpak --skip-snap
 
 # Build individual packages
-./build-deb.sh v2.0.9
-./build-rpm.sh v2.0.9
-./build-appimage.sh v2.0.9
-./build-flatpak.sh v2.0.9
-./build-snap.sh v2.0.9
+./build-deb.sh v2.1.0
+./build-rpm.sh v2.1.0
+./build-appimage.sh v2.1.0
+./build-flatpak.sh v2.1.0
+./build-snap.sh v2.1.0
 ```
 
 ## Release Process
@@ -53,8 +53,8 @@ chmod +x build-all-linux.sh
 3. **Tag and push:**
    ```powershell
    $desc = Get-Content RELEASE_NOTES_TMP.md | Out-String
-   git tag -a v2.0.9 -m "$desc"
-   git push origin v2.0.9
+   git tag -a v2.1.0 -m "$desc"
+   git push origin v2.1.0
    ```
 
    The GitHub Actions workflow will automatically build all platform packages and create the release.
@@ -66,6 +66,7 @@ chmod +x build-all-linux.sh
 | Format | File | Description |
 |--------|------|-------------|
 | **Setup** | `MarkdownConverter-Setup-x64.exe` | Single installer — next, next, finish |
+| **MSIX** | `MarkdownConverter-win-x64.msix` | Microsoft Store compatible, clean install/uninstall, sandboxed |
 
 ### Linux
 
@@ -76,6 +77,8 @@ chmod +x build-all-linux.sh
 | **Flatpak** | `MarkdownConverter-linux-x64.flatpak` | Any distro (via Flatpak) | • Sandboxed execution<br>• Bundled dependencies<br>• Works on any distro with Flatpak<br>• Automatic cleanup on uninstall |
 | **Snap** | `MarkdownConverter-linux-x64.snap` | Ubuntu, Snap-enabled distros | • Confined security model<br>• Auto-updates (if published to Snap Store)<br>• Cross-distro compatibility |
 | **AppImage** | `MarkdownConverter-linux-x64.AppImage` | Any distro (portable) | • No installation required<br>• Runs on any modern Linux<br>• Self-contained with all dependencies<br>• Zstd compression for smaller size |
+| **AUR** | `PKGBUILD` | Arch Linux, Manjaro | • Integrates with Arch `pacman`<br>• Built from portable release |
+| **Nix** | `flake.nix` | NixOS, Nix package manager | • Declarative dependency management<br>• Reproducible builds |
 | **Portable tar.gz** | `MarkdownConverter-linux-x64-portable.tar.gz` | Manual extraction | • Manual installation<br>• Custom deployment scenarios |
 
 ## Installation & Uninstallation Details
@@ -106,6 +109,20 @@ MarkdownConverter-Setup-x64.exe /VERYSILENT /NORESTART
 - Automatically detects and removes any existing installation
 - Version checking warns if attempting to install an older version
 - Clean replacement — no leftover files
+
+### Windows - MSIX
+
+**Build:**
+```powershell
+.\packaging\windows\build-msix.ps1
+```
+
+**Install:**
+Double-click the `.msix` file or run:
+```powershell
+Add-AppxPackage -Path .\release\MarkdownConverter-win-x64.msix
+```
+*Note: Unless signed with a trusted certificate, Windows may require Developer Mode to install.*
 
 ### Linux - Debian (.deb)
 
@@ -212,6 +229,27 @@ chmod +x MarkdownConverter-linux-x64.AppImage
 - Integrates with desktop via optional desktop integration
 - Self-contained with all dependencies
 
+### Linux - AUR (Arch Linux)
+
+**Install via helper (e.g., yay):**
+When published to the AUR, users can install via:
+```bash
+yay -S markdownconverter-bin
+```
+
+**Manual build:**
+```bash
+cd packaging/linux/AUR
+makepkg -si
+```
+
+### Linux - NixOS
+
+**Run directly via flakes:**
+```bash
+nix run github:AhmedElbehary-Dev/MarkdownConverter
+```
+
 ## Build Requirements
 
 ### Windows
@@ -245,8 +283,8 @@ The GitHub Actions workflow in `.github/workflows/release.yml` automatically bui
 
 ```bash
 # Trigger automated build
-git tag -a v2.0.9 -m "Release v2.0.9"
-git push origin v2.0.9
+git tag -a v2.1.0 -m "Release v2.1.0"
+git push origin v2.1.0
 ```
 
 This produces:

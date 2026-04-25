@@ -1,5 +1,5 @@
 param (
-    [string]$Version = ""       # Override version, e.g. "v2.0.8"
+    [string]$Version = ""       # Override version, e.g. "v2.1.0"
 )
 
 # --- Resolve version from .csproj if not supplied --------------------------
@@ -102,6 +102,10 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 Write-Host "   Created: .\release\MarkdownConverter-Setup-x64.exe" -ForegroundColor Green
+
+# --- Build MSIX (Optional) -------------------------------------------------
+Write-Host "[4.5/4] Building MSIX installer..." -ForegroundColor Cyan
+& .\packaging\windows\build-msix.ps1 -Version $Version
 
 # --- Summary ---------------------------------------------------------------
 Write-Host ""

@@ -1,5 +1,5 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
-  <Package Name="MarkdownConverter" Manufacturer="MarkdownConverter Team" Version="2.0.8" UpgradeCode="783eb077-d4fa-4dc4-bbf8-661cd9dc6ee8">
+  <Package Name="MarkdownConverter" Manufacturer="MarkdownConverter Team" Version="2.1.0" UpgradeCode="783eb077-d4fa-4dc4-bbf8-661cd9dc6ee8">
     <MajorUpgrade 
       DowngradeErrorMessage="A newer version is already installed." 
       AllowDowngrades="no"

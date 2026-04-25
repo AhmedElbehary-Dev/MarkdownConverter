@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.singleton.1.6.0.schema.json
+PackageIdentifier: AhmedElbehary-Dev.MarkdownConverter
+PackageVersion: 2.1.0
+PackageName: Markdown Converter Pro
+Publisher: MarkdownConverter Team
+License: MIT
+ShortDescription: Convert Markdown files into PDF, Word (DOCX), and Excel (XLSX) formats.
+Moniker: markdownconverter
+Tags:
+  - markdown
+  - pdf
+  - converter
+  - docx
+  - excel
+Installers:
+  - Architecture: x64
+    InstallerType: inno
+    InstallerUrl: https://github.com/AhmedElbehary-Dev/MarkdownConverter/releases/download/v2.1.0/MarkdownConverter-Setup-x64.exe
+    InstallerSha256: <SHA256_HASH_HERE>
+ManifestType: singleton
+ManifestVersion: 1.6.0

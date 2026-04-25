@@ -22,7 +22,7 @@ while [[ $# -gt 0 ]]; do
             echo "Usage: ./build-all-linux.sh [VERSION] [OPTIONS]"
             echo ""
             echo "Arguments:"
-            echo "  VERSION          Version number (e.g., v2.0.9 or 2.0.9)"
+            echo "  VERSION          Version number (e.g., v2.1.0 or 2.1.0)"
             echo ""
             echo "Options:"
             echo "  --skip-deb       Skip building .deb package"
