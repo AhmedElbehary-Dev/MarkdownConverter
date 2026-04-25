@@ -12,6 +12,7 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    timeout-minutes: 360
     permissions:
       actions: read
       contents: read
@@ -26,6 +27,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
@@ -33,15 +39,11 @@ jobs:
         config-file: ./.github/codeql-config.yml
         queries: security-extended,security-and-quality
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 10.0.x
-
     - name: Build
-      run: dotnet build MarkdownConverter.sln -c Release
+      run: dotnet build MarkdownConverter.sln -c Release /p:UseSharedCompilation=false
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:
         category: "/language:${{matrix.language}}"
+

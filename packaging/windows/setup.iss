@@ -1,7 +1,7 @@
 [Setup]
 AppId={{783eb077-d4fa-4dc4-bbf8-661cd9dc6ee8}
 AppName=MarkdownConverter
-AppVersion=2.1.0
+AppVersion=2.1.1
 AppPublisher=AhmedElbehary-Dev
 AppPublisherURL=https://github.com/AhmedElbehary-Dev/MarkdownConverter
 AppSupportURL=https://github.com/AhmedElbehary-Dev/MarkdownConverter/issues
