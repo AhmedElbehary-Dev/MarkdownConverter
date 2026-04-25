@@ -307,6 +307,8 @@ internal static class Program
         public List<string> OpenedPaths { get; } = [];
 
         public Task<string?> PickMarkdownFileAsync() => Task.FromResult(NextMarkdownPath);
+        
+        public Task<string[]?> PickMarkdownFilesAsync() => Task.FromResult(NextMarkdownPath is null ? null : new[] { NextMarkdownPath });
 
         public Task<string?> PickPdfFileAsync() => Task.FromResult<string?>(null);
         

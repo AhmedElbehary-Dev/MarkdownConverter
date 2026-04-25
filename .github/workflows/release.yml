@@ -36,6 +36,9 @@ jobs:
           mkdir release -ea 0
           iscc .\packaging\windows\setup.iss
 
+      - name: Setup Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1
+
       - name: Build MSIX
         run: |
           $ver = "${{ github.ref_name }}".TrimStart('v')
