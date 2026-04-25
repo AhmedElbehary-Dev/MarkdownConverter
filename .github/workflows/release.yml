@@ -36,11 +36,22 @@ jobs:
           mkdir release -ea 0
           iscc .\packaging\windows\setup.iss
 
+      - name: Build MSIX
+        run: |
+          $ver = "${{ github.ref_name }}".TrimStart('v')
+          .\packaging\windows\build-msix.ps1 -Version $ver
+
+      - name: Create Portable Zip
+        run: Compress-Archive -Path .\bin\Release\net10.0\win-x64\publish\* -DestinationPath .\release\MarkdownConverter-win-x64-portable.zip -Force
+
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-installer
-          path: release\*.exe
+          path: |
+            release\*.exe
+            release\*.msix
+            release\*.zip
 
   build-linux-deb:
     runs-on: ubuntu-latest
@@ -186,6 +197,8 @@ jobs:
           body_path: release_notes.md
           files: |
             artifacts/*.exe
+            artifacts/*.msix
+            artifacts/*.zip
             artifacts/*.deb
             artifacts/*.rpm
             artifacts/*.AppImage
