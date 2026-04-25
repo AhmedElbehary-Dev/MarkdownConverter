@@ -101,9 +101,9 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (TryGetDroppedFile(e, out var filePath))
+        if (TryGetDroppedFiles(e, out var filePaths) && filePaths.Length > 0)
         {
-            viewModel.TrySetSelectedMarkdownPathFromDrop(filePath);
+            viewModel.TrySetSelectedMarkdownPathsFromDrop(filePaths);
         }
 
         viewModel.IsDropZoneActive = false;
@@ -132,18 +132,18 @@ public partial class MainWindow : Window
         return DragDropEffects.None;
     }
 
-    private static bool TryGetDroppedFile(DragEventArgs e, out string filePath)
+    private static bool TryGetDroppedFiles(DragEventArgs e, out string[] filePaths)
     {
-        filePath = string.Empty;
+        filePaths = Array.Empty<string>();
 
         // 1. Try Avalonia 11 Storage Items (Recommended)
         var storageItems = e.Data.GetFiles();
         if (storageItems != null)
         {
-            var path = storageItems.Select(GetLocalPath).FirstOrDefault(p => !string.IsNullOrWhiteSpace(p));
-            if (path != null)
+            var paths = storageItems.Select(GetLocalPath).Where(p => !string.IsNullOrWhiteSpace(p)).Cast<string>().ToArray();
+            if (paths.Length > 0)
             {
-                filePath = path;
+                filePaths = paths;
                 return true;
             }
         }
@@ -152,19 +152,19 @@ public partial class MainWindow : Window
         var legacyFiles = e.Data.Get(DataFormats.Files);
         if (legacyFiles is IEnumerable<string> stringPaths)
         {
-            var first = stringPaths.FirstOrDefault();
-            if (!string.IsNullOrWhiteSpace(first))
+            var validPaths = stringPaths.Where(p => !string.IsNullOrWhiteSpace(p)).ToArray();
+            if (validPaths.Length > 0)
             {
-                filePath = first;
+                filePaths = validPaths;
                 return true;
             }
         }
         else if (legacyFiles is IEnumerable<object> objectPaths)
         {
-            var first = objectPaths.FirstOrDefault()?.ToString();
-            if (!string.IsNullOrWhiteSpace(first))
+            var validPaths = objectPaths.Select(o => o?.ToString()).Where(p => !string.IsNullOrWhiteSpace(p)).Cast<string>().ToArray();
+            if (validPaths.Length > 0)
             {
-                filePath = first;
+                filePaths = validPaths;
                 return true;
             }
         }
@@ -172,10 +172,10 @@ public partial class MainWindow : Window
         // 3. Last ditch effort: Platform-specific keys
         if (e.Data.Get("FileNames") is IEnumerable<string> fileNames)
         {
-            var first = fileNames.FirstOrDefault();
-            if (!string.IsNullOrWhiteSpace(first))
+            var validNames = fileNames.Where(p => !string.IsNullOrWhiteSpace(p)).ToArray();
+            if (validNames.Length > 0)
             {
-                filePath = first;
+                filePaths = validNames;
                 return true;
             }
         }

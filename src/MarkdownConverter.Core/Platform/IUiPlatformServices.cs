@@ -7,6 +7,7 @@ namespace MarkdownConverter.Platform;
 public interface IUiPlatformServices
 {
     Task<string?> PickMarkdownFileAsync();
+    Task<string[]?> PickMarkdownFilesAsync();
     Task<string?> PickPdfFileAsync();
     Task<string[]?> PickImageFilesAsync();
     Task<string?> SavePdfFileAsync(string suggestedName);

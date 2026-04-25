@@ -215,32 +215,91 @@
                 DragDrop.DragOver="DropZone_DragOver"
                 DragDrop.DragLeave="DropZone_DragLeave"
                 DragDrop.Drop="DropZone_Drop">
-          <StackPanel Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Border Classes="subtle" Width="54" Height="54" CornerRadius="14" HorizontalAlignment="Center">
-              <TextBlock Text="MD"
-                         HorizontalAlignment="Center"
-                         VerticalAlignment="Center"
-                         FontWeight="Bold"
-                         Foreground="{DynamicResource AccentStrongBrush}" />
-            </Border>
+          <Grid RowDefinitions="Auto,*">
+            <!-- Top: Drop instructions (always visible) -->
+            <StackPanel Grid.Row="0" Spacing="8" HorizontalAlignment="Center">
+              <Grid ColumnDefinitions="*,Auto" HorizontalAlignment="Center">
+                <Border Classes="subtle" Width="54" Height="54" CornerRadius="14" HorizontalAlignment="Center">
+                  <TextBlock Text="MD"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center"
+                             FontWeight="Bold"
+                             Foreground="{DynamicResource AccentStrongBrush}" />
+                </Border>
+                <!-- File count badge (visible only when multiple files selected) -->
+                <Border Grid.Column="1"
+                        IsVisible="{Binding HasMultipleFiles}"
+                        Background="{DynamicResource AccentBrush}"
+                        CornerRadius="12"
+                        Padding="8,4"
+                        Margin="8,0,0,0"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Left">
+                  <TextBlock Text="{Binding SelectedFileCount}"
+                             Foreground="#091318"
+                             FontWeight="Bold"
+                             FontSize="12"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center" />
+                </Border>
+              </Grid>
 
-            <TextBlock Text="Drop markdown file here"
-                       FontWeight="SemiBold"
-                       FontSize="16"
-                       HorizontalAlignment="Center" />
-            <TextBlock Text=".md or .markdown"
-                       Foreground="{DynamicResource TextSecondaryBrush}"
-                       HorizontalAlignment="Center" />
-            <Button Content="Browse"
-                    Classes="primary"
-                    Command="{Binding BrowseCommand}"
-                    HorizontalAlignment="Center" />
-            <TextBlock Text="{Binding SelectedMarkdownPath}"
-                       Foreground="{DynamicResource TextSecondaryBrush}"
-                       TextWrapping="Wrap"
-                       HorizontalAlignment="Center"
-                       MaxWidth="520" />
-          </StackPanel>
+              <TextBlock Text="Drop markdown files here"
+                         FontWeight="SemiBold"
+                         FontSize="16"
+                         HorizontalAlignment="Center" />
+              <TextBlock Text=".md or .markdown (multi-select supported)"
+                         Foreground="{DynamicResource TextSecondaryBrush}"
+                         HorizontalAlignment="Center" />
+              <Button Content="Browse"
+                      Classes="primary"
+                      Command="{Binding BrowseCommand}"
+                      HorizontalAlignment="Center" />
+            </StackPanel>
+
+            <!-- Bottom: File path or file list -->
+            <ScrollViewer Grid.Row="1" Margin="0,10,0,0" VerticalScrollBarVisibility="Auto">
+              <StackPanel Spacing="4">
+                <!-- Single file: show path text -->
+                <TextBlock Text="{Binding SelectedFilesDisplayText}"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           TextWrapping="Wrap"
+                           HorizontalAlignment="Center"
+                           MaxWidth="520"
+                           IsVisible="{Binding !HasMultipleFiles}" />
+
+                <!-- Multiple files: show a compact list with remove buttons -->
+                <ItemsControl ItemsSource="{Binding SelectedFiles}"
+                              IsVisible="{Binding HasMultipleFiles}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Border Background="#1A2029"
+                              CornerRadius="6"
+                              Padding="8,4"
+                              Margin="0,2">
+                        <Grid ColumnDefinitions="*,Auto">
+                          <TextBlock Text="{Binding}"
+                                     Foreground="{DynamicResource TextSecondaryBrush}"
+                                     VerticalAlignment="Center"
+                                     TextTrimming="CharacterEllipsis"
+                                     FontSize="12" />
+                          <Button Grid.Column="1"
+                                  Content="✕"
+                                  Classes="flat"
+                                  Padding="4,2"
+                                  FontSize="10"
+                                  MinWidth="0"
+                                  MinHeight="0"
+                                  Command="{Binding $parent[ItemsControl].((vm:MainViewModel)DataContext).RemoveFileCommand}"
+                                  CommandParameter="{Binding}" />
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </ScrollViewer>
+          </Grid>
         </Border>
 
       </DockPanel>

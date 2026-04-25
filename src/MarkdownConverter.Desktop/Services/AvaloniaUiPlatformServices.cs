@@ -49,6 +49,35 @@ public sealed class AvaloniaUiPlatformServices : IUiPlatformServices
         return ToLocalPath(files.FirstOrDefault());
     }
 
+    public async Task<string[]?> PickMarkdownFilesAsync()
+    {
+        var owner = _getOwner();
+        if (owner?.StorageProvider is null)
+        {
+            return null;
+        }
+
+        var files = await owner.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Select Markdown Files",
+            AllowMultiple = true,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("Markdown Files")
+                {
+                    Patterns = ["*.md", "*.markdown"]
+                },
+                new FilePickerFileType("All Files")
+                {
+                    Patterns = ["*"]
+                }
+            ]
+        });
+
+        var paths = files.Select(ToLocalPath).Where(p => p != null).Cast<string>().ToArray();
+        return paths.Length > 0 ? paths : null;
+    }
+
     public async Task<string?> PickPdfFileAsync()
     {
         var owner = _getOwner();

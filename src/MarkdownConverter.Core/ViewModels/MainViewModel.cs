@@ -67,6 +67,16 @@ namespace MarkdownConverter.ViewModels
             };
             SelectedFormat = Formats.First().Value;
 
+            SelectedFiles = new ObservableCollection<string>();
+            SelectedFiles.CollectionChanged += (_, _) =>
+            {
+                OnPropertyChanged(nameof(HasMarkdownFile));
+                OnPropertyChanged(nameof(HasMultipleFiles));
+                OnPropertyChanged(nameof(SelectedFileCount));
+                OnPropertyChanged(nameof(SelectedFilesDisplayText));
+                ConvertCommand?.RaiseCanExecuteChanged();
+            };
+
             _browseCommand = new AsyncRelayCommand(BrowseInputFileAsync, () => !IsBusy);
             _browseOutputFolderCommand = new AsyncRelayCommand(BrowseOutputFolderAsync, () => !IsBusy);
             _openOutputFolderCommand = new RelayCommand(_ => OpenOutputFolder(), _ => !IsBusy);
@@ -79,6 +89,7 @@ namespace MarkdownConverter.ViewModels
             CopyOutputCommand = _copyOutputCommand;
             ClearCommand = _clearCommand;
             ConvertCommand = new AsyncRelayCommand(ConvertAsync, CanConvert);
+            RemoveFileCommand = new RelayCommand(RemoveFile, _ => !IsBusy);
 
             _toastTimer = _uiPlatformServices.CreateTimer(TimeSpan.FromSeconds(3), OnToastTimerTick);
 
@@ -113,6 +124,42 @@ namespace MarkdownConverter.ViewModels
 
         public ObservableCollection<FormatOption> Formats { get; }
 
+        /// <summary>
+        /// The list of selected markdown files for batch conversion.
+        /// </summary>
+        public ObservableCollection<string> SelectedFiles { get; }
+
+        /// <summary>
+        /// True when more than one file is selected.
+        /// </summary>
+        public bool HasMultipleFiles => SelectedFiles.Count > 1;
+
+        /// <summary>
+        /// Number of files currently queued for conversion.
+        /// </summary>
+        public int SelectedFileCount => SelectedFiles.Count;
+
+        /// <summary>
+        /// Display text for the drop zone: shows the single file path, or "N files selected".
+        /// </summary>
+        public string SelectedFilesDisplayText
+        {
+            get
+            {
+                if (SelectedFiles.Count == 0)
+                {
+                    return string.Empty;
+                }
+
+                if (SelectedFiles.Count == 1)
+                {
+                    return SelectedFiles[0];
+                }
+
+                return $"{SelectedFiles.Count} files selected";
+            }
+        }
+
         public OutputFormat SelectedFormat
         {
             get => _selectedFormat;
@@ -143,7 +190,7 @@ namespace MarkdownConverter.ViewModels
             }
         }
 
-        public bool HasMarkdownFile => !string.IsNullOrWhiteSpace(SelectedMarkdownPath);
+        public bool HasMarkdownFile => SelectedFiles.Count > 0 || !string.IsNullOrWhiteSpace(SelectedMarkdownPath);
 
         public string OutputFolder
         {
@@ -251,6 +298,11 @@ namespace MarkdownConverter.ViewModels
 
         public AsyncRelayCommand ConvertCommand { get; }
 
+        /// <summary>
+        /// Command to remove an individual file from the selection. Parameter is the file path string.
+        /// </summary>
+        public RelayCommand RemoveFileCommand { get; }
+
         public void SetSelectedMarkdownPath(string filePath)
         {
             if (string.IsNullOrWhiteSpace(filePath))
@@ -259,6 +311,11 @@ namespace MarkdownConverter.ViewModels
             }
 
             SelectedMarkdownPath = filePath;
+
+            // Sync SelectedFiles to contain just this single file
+            SelectedFiles.Clear();
+            SelectedFiles.Add(filePath);
+
             if (!_outputFolderManuallySet)
             {
                 var directory = Path.GetDirectoryName(filePath);
@@ -269,6 +326,56 @@ namespace MarkdownConverter.ViewModels
             }
 
             StatusText = "Ready";
+            StatusKind = StatusKind.Neutral;
+        }
+
+        /// <summary>
+        /// Set multiple markdown file paths for batch conversion.
+        /// Replaces any existing selection.
+        /// </summary>
+        public void SetSelectedMarkdownPaths(string[] filePaths)
+        {
+            if (filePaths == null || filePaths.Length == 0)
+            {
+                return;
+            }
+
+            // Validate and filter to only valid markdown files
+            var validPaths = filePaths.Where(p => IsValidMarkdownFile(p) && File.Exists(p)).ToArray();
+
+            if (validPaths.Length == 0)
+            {
+                StatusText = "No valid markdown files found.";
+                StatusKind = StatusKind.Error;
+                ShowToast("No valid .md or .markdown files in selection.", ToastKind.Error);
+                return;
+            }
+
+            SelectedFiles.Clear();
+            foreach (var path in validPaths)
+            {
+                SelectedFiles.Add(path);
+            }
+
+            // Keep SelectedMarkdownPath in sync for backward compatibility
+            SelectedMarkdownPath = validPaths[0];
+
+            if (!_outputFolderManuallySet)
+            {
+                var directory = Path.GetDirectoryName(validPaths[0]);
+                if (!string.IsNullOrWhiteSpace(directory))
+                {
+                    SetOutputFolder(directory, markAsManual: false);
+                }
+            }
+
+            int skipped = filePaths.Length - validPaths.Length;
+            if (skipped > 0)
+            {
+                ShowToast($"{validPaths.Length} files added, {skipped} skipped (not .md/.markdown).", ToastKind.Success);
+            }
+
+            StatusText = validPaths.Length == 1 ? "Ready" : $"{validPaths.Length} files ready";
             StatusKind = StatusKind.Neutral;
         }
 
@@ -298,12 +405,39 @@ namespace MarkdownConverter.ViewModels
             return true;
         }
 
+        /// <summary>
+        /// Accept multiple dropped files. Validates each and adds valid ones.
+        /// </summary>
+        public bool TrySetSelectedMarkdownPathsFromDrop(string[] filePaths)
+        {
+            if (filePaths == null || filePaths.Length == 0)
+            {
+                return false;
+            }
+
+            // Single file drop — use existing path for identical UX
+            if (filePaths.Length == 1)
+            {
+                return TrySetSelectedMarkdownPathFromDrop(filePaths[0]);
+            }
+
+            SetSelectedMarkdownPaths(filePaths);
+            return SelectedFiles.Count > 0;
+        }
+
         private async Task BrowseInputFileAsync()
         {
-            var selected = await _uiPlatformServices.PickMarkdownFileAsync().ConfigureAwait(true);
-            if (!string.IsNullOrWhiteSpace(selected))
+            var selected = await _uiPlatformServices.PickMarkdownFilesAsync().ConfigureAwait(true);
+            if (selected != null && selected.Length > 0)
             {
-                SetSelectedMarkdownPath(selected);
+                if (selected.Length == 1)
+                {
+                    SetSelectedMarkdownPath(selected[0]);
+                }
+                else
+                {
+                    SetSelectedMarkdownPaths(selected);
+                }
             }
         }
 
@@ -343,6 +477,7 @@ namespace MarkdownConverter.ViewModels
 
         private void Clear()
         {
+            SelectedFiles.Clear();
             SelectedMarkdownPath = string.Empty;
             OutputFilePath = string.Empty;
             Progress = 0;
@@ -352,12 +487,28 @@ namespace MarkdownConverter.ViewModels
 
         private bool CanConvert()
         {
-            return !IsBusy && File.Exists(SelectedMarkdownPath);
+            if (IsBusy)
+            {
+                return false;
+            }
+
+            // Multi-file: at least one file must exist
+            if (SelectedFiles.Count > 0)
+            {
+                return SelectedFiles.Any(File.Exists);
+            }
+
+            // Fallback: single file
+            return File.Exists(SelectedMarkdownPath);
         }
 
         private async Task ConvertAsync()
         {
-            if (!File.Exists(SelectedMarkdownPath))
+            var filesToConvert = SelectedFiles.Count > 0
+                ? SelectedFiles.Where(File.Exists).ToArray()
+                : (File.Exists(SelectedMarkdownPath) ? new[] { SelectedMarkdownPath } : Array.Empty<string>());
+
+            if (filesToConvert.Length == 0)
             {
                 StatusText = "Select a valid markdown file.";
                 StatusKind = StatusKind.Error;
@@ -365,7 +516,22 @@ namespace MarkdownConverter.ViewModels
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(OutputFilePath))
+            // Single-file conversion — use original logic for identical behavior
+            if (filesToConvert.Length == 1)
+            {
+                await ConvertSingleFileAsync(filesToConvert[0]).ConfigureAwait(true);
+                return;
+            }
+
+            // Multi-file batch conversion
+            await ConvertMultipleFilesAsync(filesToConvert).ConfigureAwait(true);
+        }
+
+        private async Task ConvertSingleFileAsync(string inputPath)
+        {
+            var outputPath = BuildOutputPath(inputPath);
+
+            if (string.IsNullOrWhiteSpace(outputPath))
             {
                 StatusText = "Choose an output folder.";
                 StatusKind = StatusKind.Error;
@@ -373,7 +539,7 @@ namespace MarkdownConverter.ViewModels
                 return;
             }
 
-            if (File.Exists(OutputFilePath) && !OverwriteIfExists)
+            if (File.Exists(outputPath) && !OverwriteIfExists)
             {
                 StatusText = "Output file already exists.";
                 StatusKind = StatusKind.Error;
@@ -385,13 +551,14 @@ namespace MarkdownConverter.ViewModels
             Progress = 0;
             StatusText = "Converting...";
             StatusKind = StatusKind.Info;
+            OutputFilePath = outputPath;
 
             var formatValue = GetSelectedExtension();
             var progressReporter = new Progress<double>(value => Progress = Math.Clamp(value, 0, 100));
 
             try
             {
-                await _conversionService.ConvertAsync(SelectedMarkdownPath, OutputFilePath, formatValue, progressReporter).ConfigureAwait(true);
+                await _conversionService.ConvertAsync(inputPath, outputPath, formatValue, progressReporter).ConfigureAwait(true);
                 Progress = 100;
                 StatusText = "Complete";
                 StatusKind = StatusKind.Success;
@@ -401,7 +568,7 @@ namespace MarkdownConverter.ViewModels
                 {
                     try
                     {
-                        _uiPlatformServices.OpenPathWithShell(OutputFilePath);
+                        _uiPlatformServices.OpenPathWithShell(outputPath);
                     }
                     catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or System.IO.IOException)
                     {
@@ -421,21 +588,133 @@ namespace MarkdownConverter.ViewModels
             }
         }
 
+        private async Task ConvertMultipleFilesAsync(string[] filePaths)
+        {
+            IsBusy = true;
+            Progress = 0;
+            StatusText = $"Converting 0/{filePaths.Length}...";
+            StatusKind = StatusKind.Info;
+
+            var formatValue = GetSelectedExtension();
+            int succeeded = 0;
+            int failed = 0;
+            string lastOutputPath = string.Empty;
+
+            try
+            {
+                for (int i = 0; i < filePaths.Length; i++)
+                {
+                    var inputPath = filePaths[i];
+                    var outputPath = BuildOutputPath(inputPath);
+
+                    if (string.IsNullOrWhiteSpace(outputPath))
+                    {
+                        failed++;
+                        continue;
+                    }
+
+                    if (File.Exists(outputPath) && !OverwriteIfExists)
+                    {
+                        failed++;
+                        continue;
+                    }
+
+                    StatusText = $"Converting {i + 1}/{filePaths.Length}...";
+                    OutputFilePath = outputPath;
+
+                    // Calculate progress: each file gets an equal slice of 0-100
+                    double fileBaseProgress = (double)i / filePaths.Length * 100;
+                    double fileSlice = 100.0 / filePaths.Length;
+                    var progressReporter = new Progress<double>(value =>
+                    {
+                        double clampedFileProgress = Math.Clamp(value, 0, 100);
+                        Progress = Math.Clamp(fileBaseProgress + (clampedFileProgress / 100.0 * fileSlice), 0, 100);
+                    });
+
+                    try
+                    {
+                        await _conversionService.ConvertAsync(inputPath, outputPath, formatValue, progressReporter).ConfigureAwait(true);
+                        succeeded++;
+                        lastOutputPath = outputPath;
+                    }
+                    catch (Exception ex) when (ex is not OperationCanceledException)
+                    {
+                        failed++;
+                        // Continue with remaining files instead of aborting
+                    }
+                }
+
+                Progress = 100;
+
+                if (failed == 0)
+                {
+                    StatusText = $"Complete ({succeeded} files)";
+                    StatusKind = StatusKind.Success;
+                    await ShowAlertPopupAsync($"All {succeeded} files converted successfully.", ToastKind.Success).ConfigureAwait(true);
+                }
+                else if (succeeded > 0)
+                {
+                    StatusText = $"Partial ({succeeded} ok, {failed} failed)";
+                    StatusKind = StatusKind.Error;
+                    await ShowAlertPopupAsync($"{succeeded} files converted, {failed} failed.", ToastKind.Error).ConfigureAwait(true);
+                }
+                else
+                {
+                    StatusText = "All conversions failed.";
+                    StatusKind = StatusKind.Error;
+                    await ShowAlertPopupAsync("All conversions failed.", ToastKind.Error).ConfigureAwait(true);
+                }
+
+                // For multi-file, open the output folder rather than individual files
+                if (OpenAfterConvert && succeeded > 0 && !string.IsNullOrWhiteSpace(OutputFolder) && Directory.Exists(OutputFolder))
+                {
+                    try
+                    {
+                        _uiPlatformServices.OpenPathWithShell(OutputFolder);
+                    }
+                    catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or System.IO.IOException)
+                    {
+                        ShowToast("Could not open the output folder.", ToastKind.Error);
+                    }
+                }
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        /// <summary>
+        /// Build the output file path for a given input markdown file.
+        /// </summary>
+        private string BuildOutputPath(string inputPath)
+        {
+            var baseFolder = string.IsNullOrWhiteSpace(OutputFolder)
+                ? Path.GetDirectoryName(inputPath) ?? Environment.CurrentDirectory
+                : OutputFolder;
+
+            var fileName = Path.GetFileNameWithoutExtension(inputPath);
+            var extension = GetSelectedExtension();
+            return Path.Join(baseFolder, $"{fileName}.{extension}");
+        }
+
         private void UpdateOutputPath()
         {
             if (string.IsNullOrWhiteSpace(SelectedMarkdownPath))
             {
-                OutputFilePath = string.Empty;
+                // For multi-file, show the output folder path
+                if (SelectedFiles.Count > 1)
+                {
+                    OutputFilePath = OutputFolder;
+                }
+                else
+                {
+                    OutputFilePath = string.Empty;
+                }
                 return;
             }
 
-            var baseFolder = string.IsNullOrWhiteSpace(OutputFolder)
-                ? Path.GetDirectoryName(SelectedMarkdownPath) ?? Environment.CurrentDirectory
-                : OutputFolder;
-
-            var fileName = Path.GetFileNameWithoutExtension(SelectedMarkdownPath);
-            var extension = GetSelectedExtension();
-            OutputFilePath = Path.Join(baseFolder, $"{fileName}.{extension}");
+            OutputFilePath = BuildOutputPath(SelectedMarkdownPath);
         }
 
         private void SetOutputFolder(string value, bool markAsManual)
@@ -483,6 +762,31 @@ namespace MarkdownConverter.ViewModels
             _browseOutputFolderCommand.RaiseCanExecuteChanged();
             _openOutputFolderCommand.RaiseCanExecuteChanged();
             _clearCommand.RaiseCanExecuteChanged();
+        }
+
+        private void RemoveFile(object? parameter)
+        {
+            if (parameter is string filePath && SelectedFiles.Contains(filePath))
+            {
+                SelectedFiles.Remove(filePath);
+
+                // Update SelectedMarkdownPath to reflect current state
+                if (SelectedFiles.Count > 0)
+                {
+                    _selectedMarkdownPath = SelectedFiles[0];
+                    OnPropertyChanged(nameof(SelectedMarkdownPath));
+                }
+                else
+                {
+                    SelectedMarkdownPath = string.Empty;
+                }
+
+                UpdateOutputPath();
+                StatusText = SelectedFiles.Count > 0
+                    ? (SelectedFiles.Count == 1 ? "Ready" : $"{SelectedFiles.Count} files ready")
+                    : "Ready";
+                StatusKind = StatusKind.Neutral;
+            }
         }
     }
 }
