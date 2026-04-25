@@ -1,11 +1,18 @@
 using Avalonia;
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace MarkdownConverter.Desktop;
 
 public static class Program
 {
+    /// <summary>
+    /// When true, the app was launched with --minimized (e.g. at Windows startup)
+    /// and should start hidden in the system tray.
+    /// </summary>
+    public static bool StartMinimized { get; private set; }
+
     [STAThread]
     public static void Main(string[] args)
     {
@@ -14,6 +21,9 @@ public static class Program
             Console.WriteLine("No X display detected (DISPLAY is not set). Skipping GUI launch in headless environment.");
             return;
         }
+
+        // Check if the app should start minimized to the system tray
+        StartMinimized = args.Contains("--minimized", StringComparer.OrdinalIgnoreCase);
 
         try
         {
@@ -46,3 +56,4 @@ public static class Program
             && ex.Message.Contains("XOpenDisplay failed", StringComparison.OrdinalIgnoreCase);
     }
 }
+

@@ -1,6 +1,29 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="MarkdownConverter.Desktop.App">
+
+  <TrayIcon.Icons>
+    <TrayIcons>
+      <TrayIcon Icon="avares://MarkdownConverter.Desktop/Assets/md_converter.ico"
+                ToolTipText="Markdown Converter Pro"
+                Command="{Binding ToggleWindowCommand}"
+                IsVisible="True">
+        <TrayIcon.Menu>
+          <NativeMenu>
+            <NativeMenuItem Header="Show Markdown Converter"
+                            Command="{Binding ShowWindowCommand}" />
+            <NativeMenuItemSeparator />
+            <NativeMenuItem Header="Quick Paste"
+                            Command="{Binding QuickPasteCommand}" />
+            <NativeMenuItemSeparator />
+            <NativeMenuItem Header="Exit"
+                            Command="{Binding ExitCommand}" />
+          </NativeMenu>
+        </TrayIcon.Menu>
+      </TrayIcon>
+    </TrayIcons>
+  </TrayIcon.Icons>
+
   <Application.Styles>
     <FluentTheme />
   </Application.Styles>

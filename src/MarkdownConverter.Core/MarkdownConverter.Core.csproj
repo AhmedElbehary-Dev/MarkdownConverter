@@ -7,7 +7,7 @@
     <NuGetAudit>false</NuGetAudit>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <NoWarn>$(NoWarn);NU1510</NoWarn>
-    <Version>2.0.9</Version>
+    <Version>2.1.0</Version>
     <IsPublishable>false</IsPublishable>
   </PropertyGroup>
 

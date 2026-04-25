@@ -1,7 +1,7 @@
 [Setup]
 AppId={{783eb077-d4fa-4dc4-bbf8-661cd9dc6ee8}
 AppName=MarkdownConverter
-AppVersion=2.0.9
+AppVersion=2.1.0
 AppPublisher=AhmedElbehary-Dev
 AppPublisherURL=https://github.com/AhmedElbehary-Dev/MarkdownConverter
 AppSupportURL=https://github.com/AhmedElbehary-Dev/MarkdownConverter/issues
@@ -14,8 +14,10 @@ Compression=lzma2
 SolidCompression=yes
 OutputDir=..\..\release
 OutputBaseFilename=MarkdownConverter-Setup-x64
-ArchitecturesInstallIn64BitMode=x64
+ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=admin
+CloseApplications=force
+RestartApplications=no
 SetupMutex=MarkdownConverterSetupMutex
 ; --- Code Signing (uncomment when you have a certificate) ---
 ; SignTool=signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /a $f
@@ -29,9 +31,11 @@ Source: "deps\libwkhtmltox.dll"; DestDir: "{app}\runtimes\win-x64\native"; Flags
 [Icons]
 Name: "{group}\MarkdownConverter"; Filename: "{app}\MarkdownConverter.exe"
 Name: "{autodesktop}\MarkdownConverter"; Filename: "{app}\MarkdownConverter.exe"; Tasks: desktopicon
+Name: "{userstartup}\MarkdownConverter"; Filename: "{app}\MarkdownConverter.exe"; Parameters: "--minimized"; Tasks: startupicon
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "startupicon"; Description: "Start Markdown Converter with Windows (minimized to tray)"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Code]
 var
@@ -123,6 +127,66 @@ begin
       RegWriteStringValue(HKLM, 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment', 'Path', Path);
     end;
   end;
+end;
+
+{ Kill any running MarkdownConverter processes to prevent file locks }
+procedure KillRunningInstances();
+var
+  ResultCode: Integer;
+begin
+  Exec('taskkill.exe', '/F /IM MarkdownConverter.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  { Small delay to ensure file locks are released }
+  Sleep(500);
+end;
+
+{ PrepareToInstall runs BEFORE file extraction — this is the safe place
+  to uninstall the old version without racing against new file writes. }
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  sUnInstPath: String;
+  sUnInstallString: String;
+  iResultCode: Integer;
+begin
+  Result := '';  { empty = no error, proceed with install }
+  NeedsRestart := False;
+
+  { Kill running instances first so the uninstaller and file extraction succeed }
+  KillRunningInstances();
+
+  { Check for existing installation }
+  sUnInstPath := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\{#emit SetupSetting("AppId")}_is1');
+  sUnInstallString := '';
+  if not RegQueryStringValue(HKLM, sUnInstPath, 'UninstallString', sUnInstallString) then
+    RegQueryStringValue(HKCU, sUnInstPath, 'UninstallString', sUnInstallString);
+  
+  if sUnInstallString <> '' then
+  begin
+    sUnInstallString := RemoveQuotes(sUnInstallString);
+    if FileExists(sUnInstallString) then
+    begin
+      Log('Running old uninstaller: ' + sUnInstallString);
+      if not Exec(sUnInstallString, '/SILENT /NORESTART /SUPPRESSMSGBOXES', '', SW_HIDE, ewWaitUntilTerminated, iResultCode) then
+        Log('Old uninstaller failed with code: ' + IntToStr(iResultCode));
+    end
+    else
+    begin
+      Log('Old uninstaller not found at: ' + sUnInstallString);
+      { Clean orphan registry entry so Inno Setup does not create unins001 variant }
+      RegDeleteKeyIncludingSubkeys(HKLM, sUnInstPath);
+      RegDeleteKeyIncludingSubkeys(HKCU, sUnInstPath);
+      Log('Cleaned orphan uninstall registry entry');
+    end;
+  end;
+
+  { Ensure no stale unins* files remain that would cause Inno to create unins001 }
+  if FileExists(ExpandConstant('{app}\unins000.exe')) then
+    DeleteFile(ExpandConstant('{app}\unins000.exe'));
+  if FileExists(ExpandConstant('{app}\unins000.dat')) then
+    DeleteFile(ExpandConstant('{app}\unins000.dat'));
+  if FileExists(ExpandConstant('{app}\unins001.exe')) then
+    DeleteFile(ExpandConstant('{app}\unins001.exe'));
+  if FileExists(ExpandConstant('{app}\unins001.dat')) then
+    DeleteFile(ExpandConstant('{app}\unins001.dat'));
 end;
 
 procedure RunDependencySetup();
@@ -237,32 +301,8 @@ begin
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
-var
-  sUnInstPath: String;
-  sUnInstallString: String;
-  iResultCode: Integer;
 begin
-  if (CurStep = ssInstall) then
-  begin
-    sUnInstPath := ExpandConstant('Software\Microsoft\Windows\CurrentVersion\Uninstall\{#emit SetupSetting("AppId")}_is1');
-    sUnInstallString := '';
-    if not RegQueryStringValue(HKLM, sUnInstPath, 'UninstallString', sUnInstallString) then
-      RegQueryStringValue(HKCU, sUnInstPath, 'UninstallString', sUnInstallString);
-    
-    if sUnInstallString <> '' then
-    begin
-      sUnInstallString := RemoveQuotes(sUnInstallString);
-      if FileExists(sUnInstallString) then
-      begin
-        Exec(sUnInstallString, '/SILENT /NORESTART /SUPPRESSMSGBOXES', '', SW_HIDE, ewWaitUntilTerminated, iResultCode);
-      end
-      else
-      begin
-        Log('Old uninstaller not found at: ' + sUnInstallString + '. Proceeding with installation anyway.');
-      end;
-    end;
-  end
-  else if (CurStep = ssPostInstall) then
+  if (CurStep = ssPostInstall) then
   begin
     RunDependencySetup();
   end;
@@ -279,7 +319,12 @@ var
   WkhtmltopdfUninstallCmd, PathsAdded, PathItem: String;
   iResultCode, P: Integer;
 begin
-  if CurStep = usPostUninstall then
+  if CurStep = usUninstall then
+  begin
+    { Kill running instances before uninstalling }
+    KillRunningInstances();
+  end
+  else if CurStep = usPostUninstall then
   begin
     { Uninstall wkhtmltopdf only if WE installed it }
     if RegQueryDWordValue(HKLM, 'Software\MarkdownConverterTeam\MarkdownConverter\InstallManifest', 'WkhtmltopdfInstalled', WkhtmltopdfInstalled) then
@@ -310,12 +355,12 @@ begin
       end;
     end;
     
-    { Clean registry }
+    { Clean our custom registry entries }
     RegDeleteKeyIncludingSubkeys(HKLM, 'Software\MarkdownConverterTeam\MarkdownConverter');
     RegDeleteKeyIncludingSubkeys(HKCU, 'Software\MarkdownConverterTeam');
     
-    { Clean files and shortcuts }
-    DelTree(ExpandConstant('{app}'), True, True, True);
+    { Clean the start menu group - Inno Setup handles app dir cleanup itself }
     DelTree(ExpandConstant('{group}'), True, True, False);
   end;
 end;
+

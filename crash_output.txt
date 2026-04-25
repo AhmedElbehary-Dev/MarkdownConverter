@@ -1,0 +1,5 @@
+Unhandled exception. System.IO.FileNotFoundException: Could not load file or assembly 'Avalonia.Controls, Version=11.2.1.0, Culture=neutral, PublicKeyToken=c8d484a7012f9a8b'. The system cannot find the file specified.
+File name: 'Avalonia.Controls, Version=11.2.1.0, Culture=neutral, PublicKeyToken=c8d484a7012f9a8b'
+   at MarkdownConverter.Desktop.Program.Main(String[] args) in C:\Users\Elbehary\source\repos\MarkdownConverter\src\MarkdownConverter.Desktop\Program.cs:line 19
+   at MarkdownConverter.Desktop.Program.Main(String[] args) in C:\Users\Elbehary\source\repos\MarkdownConverter\src\MarkdownConverter.Desktop\Program.cs:line 19
+   at MarkdownConverter.RootLauncherProgram.Main(String[] args) in C:\Users\Elbehary\source\repos\MarkdownConverter\RootLauncherProgram.cs:line 8

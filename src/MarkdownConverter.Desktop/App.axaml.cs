@@ -12,9 +12,15 @@ namespace MarkdownConverter.Desktop;
 
 public partial class App : Application
 {
+    private TrayIconViewModel? _trayViewModel;
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+
+        // Set DataContext for TrayIcon command bindings declared in App.axaml
+        _trayViewModel = new TrayIconViewModel();
+        DataContext = _trayViewModel;
     }
 
     public override void OnFrameworkInitializationCompleted()
@@ -35,6 +41,9 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.MainWindow = new MainWindow(CreateMainViewModel);
+
+            // Keep the app running when the window is "closed" (it hides to tray instead)
+            desktop.ShutdownMode = Avalonia.Controls.ShutdownMode.OnExplicitShutdown;
         }
 
         base.OnFrameworkInitializationCompleted();

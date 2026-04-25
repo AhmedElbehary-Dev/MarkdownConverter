@@ -9,6 +9,7 @@ using MarkdownConverter.ViewModels;
 using Avalonia.Platform.Storage;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace MarkdownConverter.Desktop;
@@ -35,6 +36,7 @@ public partial class MainWindow : Window
         DataContext = _viewModelFactory(() => this);
         ApplyDropZoneVisualState(isActive: false);
         Opened += MainWindow_Opened;
+        Closing += MainWindow_Closing;
 
         // Drag-drop handlers are declared in XAML (DragDrop.DragOver, DragDrop.Drop etc.)
         // We only need to ensure AllowDrop is set programmatically as a safety net.
@@ -212,6 +214,25 @@ public partial class MainWindow : Window
         return null;
     }
 
+    /// <summary>
+    /// Set to true by the tray Exit command so that closing
+    /// actually terminates instead of hiding to the tray.
+    /// </summary>
+    internal bool IsShuttingDown { get; set; }
+
+    private void MainWindow_Closing(object? sender, CancelEventArgs e)
+    {
+        if (IsShuttingDown)
+        {
+            // App is exiting — allow the window to close normally.
+            return;
+        }
+
+        // User clicked the X button — hide to system tray instead of closing.
+        e.Cancel = true;
+        Hide();
+    }
+
     private void MainWindow_Opened(object? sender, EventArgs e)
     {
         if (_linuxDesktopIdentityApplied)
@@ -221,6 +242,12 @@ public partial class MainWindow : Window
 
         _linuxDesktopIdentityApplied = true;
         LinuxDesktopIntegration.TryApplyRuntimeIdentity(this);
+
+        // If launched with --minimized (e.g. Windows startup), hide to tray immediately
+        if (Program.StartMinimized)
+        {
+            Hide();
+        }
 
         // Run auto update check in background without blocking UI
         var services = new MarkdownConverter.Desktop.Services.AvaloniaUiPlatformServices(() => this);
