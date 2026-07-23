@@ -23,6 +23,7 @@ internal static class Program
         await RunAsync(nameof(ConvertCommand_OverwriteProtectionBlocksConversion), ConvertCommand_OverwriteProtectionBlocksConversion);
         await RunAsync(nameof(ConvertCommand_XlsxConversion_SucceedsAndWritesFile), ConvertCommand_XlsxConversion_SucceedsAndWritesFile);
         await RunAsync(nameof(ConvertCommand_PdfConversion_ProducesFileOrDependencyError), ConvertCommand_PdfConversion_ProducesFileOrDependencyError);
+        await RunAsync(nameof(Render_DeepEmphasisDelimiters_DoesNotThrowDepthLimit), Render_DeepEmphasisDelimiters_DoesNotThrowDepthLimit);
         await RunAsync(nameof(BaselineScaffold_FoldersExist), BaselineScaffold_FoldersExist);
 
         Console.WriteLine();
@@ -215,6 +216,24 @@ internal static class Program
         Assert(message.Contains("wkhtmltopdf", StringComparison.OrdinalIgnoreCase)
             || message.Contains("wkhtmltox", StringComparison.OrdinalIgnoreCase),
             "PDF dependency errors should mention wkhtmltopdf/wkhtmltox.");
+    }
+
+    private static Task Render_DeepEmphasisDelimiters_DoesNotThrowDepthLimit()
+    {
+        // Default Markdig depth is 128; unresolved * / _ delimiter chains exceed it during HTML render.
+        var deepRuns = new string('*', 180) + "nested" + new string('*', 180);
+        var alternating = string.Concat(Enumerable.Repeat("*_", 100)) + "alt" + string.Concat(Enumerable.Repeat("_*", 100));
+        var renderer = new MarkdownToHtmlRenderer();
+
+        var htmlRuns = renderer.Render(deepRuns);
+        var htmlAlt = renderer.Render(alternating);
+
+        Assert(!string.IsNullOrWhiteSpace(htmlRuns), "HTML output should not be empty for long runs.");
+        Assert(htmlRuns.Contains("nested", StringComparison.Ordinal), "Sanitized content should still appear in HTML.");
+        Assert(!string.IsNullOrWhiteSpace(htmlAlt), "HTML output should not be empty for alternating delimiters.");
+        Assert(htmlAlt.Contains("alt", StringComparison.Ordinal), "Alternating-delimiter content should still appear in HTML.");
+
+        return Task.CompletedTask;
     }
 
     private static Task BaselineScaffold_FoldersExist()

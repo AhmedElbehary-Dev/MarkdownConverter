@@ -4,7 +4,7 @@
     "dotnetSdk": "10.x (fill in)",
     "wkhtmltopdf": "0.12.5",
     "packageVersions": {
-      "Markdig": "0.44.0",
+      "Markdig": "1.3.2",
       "DinkToPdf": "1.0.8",
       "ClosedXML": "0.105.0",
       "DocumentFormat.OpenXml": "3.4.1",

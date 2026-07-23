@@ -18,21 +18,13 @@ public sealed class XlsxExporter
 
     public XlsxExporter()
     {
-        _pipeline = new MarkdownPipelineBuilder()
-            .UseAdvancedExtensions()
-            .UsePipeTables()
-            .UseGridTables()
-            .UseAutoLinks()
-            .UseTaskLists()
-            .UseEmojiAndSmiley()
-            .UseSoftlineBreakAsHardlineBreak()
-            .Build();
+        _pipeline = MarkdownPipelineFactory.CreateTablePipeline();
     }
 
     public Task ExportAsync(string markdownText, string outputPath, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var document = Markdown.Parse(markdownText, _pipeline);
+        var document = ParseDocument(markdownText);
         var tables = ExtractTables(document).ToList();
 
         using var workbook = new XLWorkbook();
@@ -51,6 +43,36 @@ public sealed class XlsxExporter
 
         workbook.SaveAs(outputPath);
         return Task.CompletedTask;
+    }
+
+    private MarkdownDocument ParseDocument(string markdownText)
+    {
+        try
+        {
+            return Markdown.Parse(markdownText ?? string.Empty, _pipeline);
+        }
+        catch (ArgumentException ex) when (MarkdownPipelineFactory.IsNestingDepthExceeded(ex))
+        {
+            try
+            {
+                var sanitized = MarkdownNestingSanitizer.Sanitize(markdownText ?? string.Empty);
+                return Markdown.Parse(sanitized, _pipeline);
+            }
+            catch (ArgumentException firstRetryEx) when (MarkdownPipelineFactory.IsNestingDepthExceeded(firstRetryEx))
+            {
+                try
+                {
+                    var aggressive = MarkdownNestingSanitizer.SanitizeAggressively(markdownText ?? string.Empty);
+                    return Markdown.Parse(aggressive, _pipeline);
+                }
+                catch (ArgumentException retryEx) when (MarkdownPipelineFactory.IsNestingDepthExceeded(retryEx))
+                {
+                    throw new InvalidOperationException(
+                        "This Markdown is too deeply nested for conversion (often caused by a broken table or very long runs of * / _ characters). Simplify nested formatting or split large tables, then try again.",
+                        retryEx);
+                }
+            }
+        }
     }
 
     private static IEnumerable<MarkdownTable> ExtractTables(MarkdownDocument document)

@@ -1,5 +1,5 @@
 using Markdig;
-using Markdig.Extensions.AutoIdentifiers;
+using System;
 
 namespace MarkdownConverter.Converters;
 
@@ -143,23 +143,12 @@ img {
 
     public MarkdownToHtmlRenderer()
     {
-        _pipeline = new MarkdownPipelineBuilder()
-            .UseAdvancedExtensions()
-            .UseAutoLinks()
-            .UsePipeTables()
-            .UseGridTables()
-            .UseTaskLists()
-            .UseAutoIdentifiers(AutoIdentifierOptions.GitHub)
-            .UseEmojiAndSmiley()
-            .UseSoftlineBreakAsHardlineBreak()
-            .Build();
+        _pipeline = MarkdownPipelineFactory.CreateHtmlPipeline();
     }
 
     public string Render(string markdownText)
     {
-        var htmlBody = string.IsNullOrWhiteSpace(markdownText)
-            ? string.Empty
-            : Markdown.ToHtml(markdownText, _pipeline).Trim();
+        var htmlBody = RenderBody(markdownText);
 
         return $@"<!DOCTYPE html>
 <html lang=""en"">
@@ -176,5 +165,41 @@ img {
   </div>
 </body>
 </html>";
+    }
+
+    private string RenderBody(string markdownText)
+    {
+        if (string.IsNullOrWhiteSpace(markdownText))
+        {
+            return string.Empty;
+        }
+
+        try
+        {
+            return Markdown.ToHtml(markdownText, _pipeline).Trim();
+        }
+        catch (ArgumentException ex) when (MarkdownPipelineFactory.IsNestingDepthExceeded(ex))
+        {
+            // Pathological * / _ delimiter chains or oversized broken tables.
+            try
+            {
+                var sanitized = MarkdownNestingSanitizer.Sanitize(markdownText);
+                return Markdown.ToHtml(sanitized, _pipeline).Trim();
+            }
+            catch (ArgumentException firstRetryEx) when (MarkdownPipelineFactory.IsNestingDepthExceeded(firstRetryEx))
+            {
+                try
+                {
+                    var aggressive = MarkdownNestingSanitizer.SanitizeAggressively(markdownText);
+                    return Markdown.ToHtml(aggressive, _pipeline).Trim();
+                }
+                catch (ArgumentException retryEx) when (MarkdownPipelineFactory.IsNestingDepthExceeded(retryEx))
+                {
+                    throw new InvalidOperationException(
+                        "This Markdown is too deeply nested for conversion (often caused by a broken table or very long runs of * / _ characters). Simplify nested formatting or split large tables, then try again.",
+                        retryEx);
+                }
+            }
+        }
     }
 }
