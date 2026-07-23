@@ -156,7 +156,7 @@ jobs:
 
   release:
     needs: [build-windows, build-linux-deb, build-linux-rpm, build-linux-appimage]
-    if: always()
+    if: !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -196,7 +196,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: "Release v${{ github.ref_name }}"
+          name: "Release ${{ github.ref_name }}"
           body_path: release_notes.md
           files: |
             artifacts/*.exe

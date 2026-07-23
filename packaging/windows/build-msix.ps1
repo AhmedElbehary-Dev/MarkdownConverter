@@ -41,9 +41,9 @@ Copy-Item "$publishDir\*" $msixStagingDir -Recurse -Force
 
 # Copy AppxManifest and inject version
 Write-Host "Configuring AppxManifest.xml..."
-$manifestContent = Get-Content "$PSScriptRoot\AppxManifest.xml"
-$manifestContent = $manifestContent -replace 'Version="[^"]+"', "Version=`"$msixVersion`""
-$manifestContent | Set-Content "$msixStagingDir\AppxManifest.xml"
+$manifestContent = Get-Content "$PSScriptRoot\AppxManifest.xml" -Raw
+$manifestContent = $manifestContent -creplace 'Version="[^"]+"', "Version=`"$msixVersion`""
+[System.IO.File]::WriteAllText("$msixStagingDir\AppxManifest.xml", $manifestContent, [System.Text.Encoding]::UTF8)
 
 # Handle Assets
 Write-Host "Setting up assets..."
@@ -63,12 +63,14 @@ if (Test-Path $iconSource) {
 $makeappx = Get-Command makeappx -ErrorAction SilentlyContinue
 if (-not $makeappx) {
     # Check common Windows SDK paths
-    $sdkPaths = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*" -Directory | Sort-Object Name -Descending
-    foreach ($sdk in $sdkPaths) {
-        $candidate = "$($sdk.FullName)\x64\makeappx.exe"
-        if (Test-Path $candidate) {
-            $makeappx = $candidate
-            break
+    if (Test-Path "C:\Program Files (x86)\Windows Kits\10\bin") {
+        $sdkPaths = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*" -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending
+        foreach ($sdk in $sdkPaths) {
+            $candidate = "$($sdk.FullName)\x64\makeappx.exe"
+            if (Test-Path $candidate) {
+                $makeappx = $candidate
+                break
+            }
         }
     }
 }
